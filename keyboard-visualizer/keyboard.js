@@ -13,6 +13,7 @@ export const KEYBOARD_CONFIG = {
   leftOffset: -12,
   rightOffset: 6,
   tiltAngle: 0.05,
+  layerSpacing: 15, // Vertical spacing between layers
 };
 
 /**
@@ -142,6 +143,113 @@ export function createKeyboards(keymap) {
 }
 
 /**
+ * Create layer label sprite
+ * @param {string} layerName - Name of the layer
+ * @param {number} y - Y position
+ * @returns {THREE.Sprite} - Label sprite
+ */
+export function createLayerLabel(layerName, y) {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  canvas.width = 512;
+  canvas.height = 128;
+
+  // Background
+  context.fillStyle = "rgba(0, 0, 0, 0.7)";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Border
+  context.strokeStyle = "#ff9800";
+  context.lineWidth = 4;
+  context.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+
+  // Text
+  context.fillStyle = "#ffffff";
+  context.font = "bold 48px Arial";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(layerName, canvas.width / 2, canvas.height / 2);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+  const sprite = new THREE.Sprite(spriteMaterial);
+  sprite.position.set(0, y, -8);
+  sprite.scale.set(10, 2.5, 1);
+
+  return sprite;
+}
+
+/**
+ * Create keyboards for all layers stacked vertically
+ * @param {Object} layers - Object containing all layers with keymap property
+ * @returns {Object} - Object containing all keyboard groups and labels
+ */
+export function createAllLayerKeyboards(layers) {
+  const layerGroups = [];
+  let yOffset = 0;
+
+  // Get layer names in order (default, lower, raise)
+  const layerOrder = ["default", "lower", "raise"];
+  const availableLayers = layerOrder.filter((name) => layers[name]);
+
+  availableLayers.forEach((layerName, index) => {
+    const layer = layers[layerName];
+    const keymap = layer.keymap;
+
+    if (!keymap) {
+      console.warn(`Layer ${layerName} has no keymap`);
+      return;
+    }
+
+    // Create keyboards for this layer
+    const leftKeyboard = createKeyboard(
+      keymap,
+      KEYBOARD_CONFIG.leftOffset,
+      "left",
+    );
+    const rightKeyboard = createKeyboard(
+      keymap,
+      KEYBOARD_CONFIG.rightOffset,
+      "right",
+    );
+
+    // Create a group to hold both keyboards
+    const layerGroup = new THREE.Group();
+    layerGroup.add(leftKeyboard);
+    layerGroup.add(rightKeyboard);
+
+    // Position the layer group
+    layerGroup.position.y = yOffset;
+    layerGroup.userData = {
+      layerName: layerName,
+      displayName: layer.displayName || layerName,
+      isLayerGroup: true,
+    };
+
+    // Create label for this layer
+    const label = createLayerLabel(
+      layer.displayName || layerName.toUpperCase(),
+      yOffset + 2,
+    );
+
+    layerGroups.push({
+      group: layerGroup,
+      label: label,
+      leftKeyboard: leftKeyboard,
+      rightKeyboard: rightKeyboard,
+      layerName: layerName,
+      displayName: layer.displayName || layerName,
+    });
+
+    // Move up for next layer
+    yOffset += KEYBOARD_CONFIG.layerSpacing;
+  });
+
+  console.log(`Created ${layerGroups.length} layer keyboards`);
+  return layerGroups;
+}
+
+/**
  * Find key object by label
  * @param {string} label - Key label to search for
  * @returns {Object|null} - Key object or null if not found
@@ -221,6 +329,20 @@ export function selectKey(keyObj) {
 export function animateFloating(leftKeyboard, rightKeyboard, time) {
   leftKeyboard.position.y = Math.sin(time * 0.5) * 0.1;
   rightKeyboard.position.y = Math.sin(time * 0.5 + Math.PI) * 0.1;
+}
+
+/**
+ * Animate floating effect for all layer keyboards
+ * @param {Array} layerGroups - Array of layer group objects
+ * @param {number} time - Current time in seconds
+ */
+export function animateAllLayersFloating(layerGroups, time) {
+  layerGroups.forEach((layerData, index) => {
+    const baseY = index * KEYBOARD_CONFIG.layerSpacing;
+    const offset = Math.sin(time * 0.5 + (index * Math.PI) / 3) * 0.1;
+    layerData.group.position.y = baseY + offset;
+    layerData.label.position.y = baseY + 2 + offset;
+  });
 }
 
 /**

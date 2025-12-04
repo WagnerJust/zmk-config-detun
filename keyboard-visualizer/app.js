@@ -13,6 +13,8 @@ import {
   createKeyboards,
   animateFloating,
   rebuildKeyboards,
+  createAllLayerKeyboards,
+  animateAllLayersFloating,
 } from "./keyboard.js";
 import {
   setupInteractions,
@@ -30,8 +32,11 @@ const app = {
   controls: null,
   leftKeyboard: null,
   rightKeyboard: null,
+  layerKeyboards: [], // Array of all layer keyboard groups
+  layerLabels: [], // Array of layer label sprites
   animationId: null,
   isInitialized: false,
+  multiLayerMode: true, // Show all layers at once
 };
 
 /**
@@ -78,14 +83,38 @@ async function init() {
     app.renderer = sceneComponents.renderer;
     app.controls = sceneComponents.controls;
 
-    // Create keyboards
-    const keyboards = createKeyboards(keymap);
-    app.leftKeyboard = keyboards.leftKeyboard;
-    app.rightKeyboard = keyboards.rightKeyboard;
+    // Create keyboards - check if we have multiple layers
+    const layers = getLayers();
+    const layerCount = Object.keys(layers).length;
 
-    // Add keyboards to scene
-    app.scene.add(app.leftKeyboard);
-    app.scene.add(app.rightKeyboard);
+    if (layerCount > 1 && app.multiLayerMode) {
+      // Multi-layer mode: show all layers stacked
+      console.log("🎹 Creating multi-layer view with", layerCount, "layers");
+      const layerGroups = createAllLayerKeyboards(layers);
+      app.layerKeyboards = layerGroups;
+
+      // Add all layer groups and labels to scene
+      layerGroups.forEach((layerData) => {
+        app.scene.add(layerData.group);
+        app.scene.add(layerData.label);
+      });
+
+      // Store references for backward compatibility
+      if (layerGroups.length > 0) {
+        app.leftKeyboard = layerGroups[0].leftKeyboard;
+        app.rightKeyboard = layerGroups[0].rightKeyboard;
+      }
+    } else {
+      // Single layer mode: show only current layer
+      console.log("🎹 Creating single-layer view");
+      const keyboards = createKeyboards(keymap);
+      app.leftKeyboard = keyboards.leftKeyboard;
+      app.rightKeyboard = keyboards.rightKeyboard;
+
+      // Add keyboards to scene
+      app.scene.add(app.leftKeyboard);
+      app.scene.add(app.rightKeyboard);
+    }
 
     // Setup interactions
     setupInteractions(app.camera, app.renderer.domElement);
@@ -146,7 +175,14 @@ function animate() {
 
   // Animate floating keyboards
   const time = Date.now() * 0.001;
-  animateFloating(app.leftKeyboard, app.rightKeyboard, time);
+
+  if (app.multiLayerMode && app.layerKeyboards.length > 0) {
+    // Animate all layer keyboards
+    animateAllLayersFloating(app.layerKeyboards, time);
+  } else if (app.leftKeyboard && app.rightKeyboard) {
+    // Animate single layer
+    animateFloating(app.leftKeyboard, app.rightKeyboard, time);
+  }
 
   // Render scene
   app.renderer.render(app.scene, app.camera);
@@ -218,13 +254,24 @@ function populateLayerSelector() {
   // Clear existing options
   layerSelect.innerHTML = "";
 
+  // Add "All Layers" option if multiple layers exist
+  if (Object.keys(layers).length > 1) {
+    const allOption = document.createElement("option");
+    allOption.value = "all";
+    allOption.textContent = "All Layers (Stacked)";
+    if (app.multiLayerMode) {
+      allOption.selected = true;
+    }
+    layerSelect.appendChild(allOption);
+  }
+
   // Add layer options
   Object.keys(layers).forEach((layerName) => {
     const option = document.createElement("option");
     option.value = layerName;
     option.textContent =
       layers[layerName].displayName || layerName.toUpperCase();
-    if (layerName === currentLayer) {
+    if (layerName === currentLayer && !app.multiLayerMode) {
       option.selected = true;
     }
     layerSelect.appendChild(option);
@@ -241,22 +288,79 @@ function populateLayerSelector() {
  * Handle layer switching
  */
 function handleLayerSwitch(layerName) {
-  if (switchLayer(layerName)) {
-    const newKeymap = getKeymap();
+  if (layerName === "all") {
+    // Switch to multi-layer mode
+    if (!app.multiLayerMode) {
+      app.multiLayerMode = true;
 
-    // Rebuild keyboards with new layer
-    const newKeyboards = rebuildKeyboards(
-      app.scene,
-      app.leftKeyboard,
-      app.rightKeyboard,
-      newKeymap,
-    );
+      // Remove old single keyboards
+      if (app.leftKeyboard) app.scene.remove(app.leftKeyboard);
+      if (app.rightKeyboard) app.scene.remove(app.rightKeyboard);
 
-    // Update app references
-    app.leftKeyboard = newKeyboards.leftKeyboard;
-    app.rightKeyboard = newKeyboards.rightKeyboard;
+      // Create and add all layer keyboards
+      const layers = getLayers();
+      const layerGroups = createAllLayerKeyboards(layers);
+      app.layerKeyboards = layerGroups;
 
-    console.log("✅ Layer switched and keyboards rebuilt");
+      layerGroups.forEach((layerData) => {
+        app.scene.add(layerData.group);
+        app.scene.add(layerData.label);
+      });
+
+      // Update UI to reflect multi-layer mode
+      const interactiveHelp = document.getElementById("interactive-help");
+      if (interactiveHelp) {
+        interactiveHelp.textContent = "🎹 View all 3 layers at once!";
+      }
+
+      // Disable edit mode if active
+      const editBtn = document.getElementById("edit-mode-toggle");
+      if (editBtn && editBtn.classList.contains("active")) {
+        toggleEditMode(); // Turn off edit mode
+        editBtn.textContent = "Edit Mode: OFF";
+        editBtn.classList.remove("active");
+        document.getElementById("export-keymap").style.display = "none";
+      }
+
+      console.log("✅ Switched to multi-layer view");
+    }
+  } else {
+    // Switch to single layer mode
+    if (switchLayer(layerName)) {
+      if (app.multiLayerMode) {
+        app.multiLayerMode = false;
+
+        // Remove all layer keyboards
+        app.layerKeyboards.forEach((layerData) => {
+          app.scene.remove(layerData.group);
+          app.scene.remove(layerData.label);
+        });
+        app.layerKeyboards = [];
+      }
+
+      const newKeymap = getKeymap();
+
+      // Rebuild keyboards with new layer
+      const newKeyboards = rebuildKeyboards(
+        app.scene,
+        app.leftKeyboard,
+        app.rightKeyboard,
+        newKeymap,
+      );
+
+      // Update app references
+      app.leftKeyboard = newKeyboards.leftKeyboard;
+      app.rightKeyboard = newKeyboards.rightKeyboard;
+
+      // Update UI help text for single layer mode
+      const interactiveHelp = document.getElementById("interactive-help");
+      if (interactiveHelp) {
+        interactiveHelp.textContent =
+          "🖱️ Click modifier keys to see combinations!";
+      }
+
+      console.log("✅ Layer switched to", layerName);
+    }
   }
 }
 
@@ -264,6 +368,12 @@ function handleLayerSwitch(layerName) {
  * Handle edit mode toggle
  */
 function handleEditModeToggle() {
+  // Don't allow edit mode in multi-layer view
+  if (app.multiLayerMode) {
+    alert("Please switch to a single layer view to use edit mode");
+    return;
+  }
+
   const isActive = toggleEditMode();
   const toggleBtn = document.getElementById("edit-mode-toggle");
   const exportBtn = document.getElementById("export-keymap");

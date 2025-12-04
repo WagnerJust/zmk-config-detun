@@ -6,9 +6,18 @@
 ## Project Overview
 
 **Name**: Detun Keyboard 3D Visualizer
-**Purpose**: Interactive 3D visualization of ZMK keyboard layout that automatically syncs with firmware configuration
+**Purpose**: Interactive 3D visualization of ZMK keyboard layout with multi-layer simultaneous view, interactive editing, and automatic sync with firmware configuration
 **Type**: Web Application (SPA - Single Page Application)
 **License**: MIT
+
+**Key Features**:
+- Multi-layer simultaneous view (all 3 layers stacked vertically)
+- Interactive key editing with visual modification tracking
+- Real-time layer switching between single and multi-layer views
+- Auto-load from ZMK configuration files
+- Export modified keymaps as JSON
+- Modifier key combinations display
+- Full 3D camera controls (rotate, pan, zoom)
 
 ## Core Requirements
 
@@ -26,6 +35,9 @@
 - FR-011: Visual indication of modified keys
 - FR-012: Export modified keymap as JSON
 - FR-013: Track modification history per layer
+- FR-014: Multi-layer simultaneous view - display all 3 layers stacked vertically
+- FR-015: Dynamic switching between single-layer and multi-layer views
+- FR-016: Layer labels showing display name for each keyboard layer
 
 ### Non-Functional Requirements
 - NFR-001: Load and render within 3 seconds
@@ -106,12 +118,18 @@
 - **Responsibilities**:
   - Initialize keymap data from ZMK config
   - Set up Three.js scene
-  - Create keyboard objects
+  - Create keyboard objects (single or multi-layer mode)
   - Initialize interactions
   - Run animation loop
   - Handle visibility changes
+  - Manage view mode switching (single vs multi-layer)
+  - Coordinate layer selection and display
 - **Exports**: None (entry point)
 - **Imports**: keymap-data.js, scene.js, keyboard.js, interactions.js
+- **Application State**:
+  - `multiLayerMode`: boolean - true shows all layers stacked
+  - `layerKeyboards`: Array - all layer keyboard groups
+  - `layerLabels`: Array - layer label sprites
 
 #### keymap-data.js (Configuration Management)
 - **Purpose**: Load and manage keyboard configuration
@@ -166,6 +184,7 @@
   - Configure orbit controls
   - Create ground plane
   - Handle window resize
+  - Position camera for multi-layer viewing
 - **Exports**:
   - `createScene()`: → THREE.Scene
   - `createCamera()`: → THREE.PerspectiveCamera
@@ -178,9 +197,12 @@
 - **Imports**: None (uses global THREE object)
 - **Three.js Configuration**:
   - Camera: PerspectiveCamera(75°, aspect, 0.1, 1000)
-  - Position: (0, 15, 25)
+  - Position: (0, 20, 45) - adjusted for multi-layer view
+  - Look At: (0, 15, 0) - middle of layer stack
   - Background: 0x1a1a2e
   - Shadows: PCFSoftShadowMap
+  - Controls: minDistance: 15, maxDistance: 80
+  - Target: (0, 15, 0) - center of vertical stack
 
 #### keyboard.js (3D Keyboard Builder)
 - **Purpose**: Create and manipulate 3D keyboard objects
@@ -192,12 +214,17 @@
   - Store key metadata
   - Provide manipulation functions (highlight, dim, select)
   - Animate floating effect
+  - Create multi-layer stacked keyboard displays
+  - Generate layer labels for visual identification
 - **Exports**:
-  - `KEYBOARD_CONFIG`: Object (dimensions and offsets)
+  - `KEYBOARD_CONFIG`: Object (dimensions, offsets, layerSpacing)
   - `keyObjects`: Array<Object> (all key references)
   - `createKey(label, x, y, z, tilt)`: → {key, sprite}
   - `createKeyboard(keymap, offsetX, side)`: → THREE.Group
   - `createKeyboards(keymap)`: → {leftKeyboard, rightKeyboard}
+  - `createAllLayerKeyboards(layers)`: → Array<Object> (all layer groups)
+  - `createLayerLabel(layerName, y)`: → THREE.Sprite
+  - `animateAllLayersFloating(layerGroups, time)`: → void
   - `findKeyByLabel(label)`: → Object | null
   - `filterKeys(predicate)`: → Array<Object>
   - `resetAllKeys()`: → void
@@ -227,7 +254,8 @@
     spacing: 0.3,
     leftOffset: -12,
     rightOffset: 6,
-    tiltAngle: 0.05
+    tiltAngle: 0.05,
+    layerSpacing: 15  // Vertical spacing between layers
   }
   ```
 
@@ -328,6 +356,18 @@ Array<Array<string>> [
 }
 ```
 
+### Layer Group Object (Multi-Layer View)
+```javascript
+{
+  group: THREE.Group,        // Container for left + right keyboards
+  label: THREE.Sprite,       // Layer name label sprite
+  leftKeyboard: THREE.Group, // Left side keyboard
+  rightKeyboard: THREE.Group,// Right side keyboard
+  layerName: string,         // 'default', 'lower', 'raise'
+  displayName: string        // 'Default Layer', 'Lower Layer'
+}
+```
+
 ### Key Object (Internal)
 ```javascript
 {
@@ -394,6 +434,50 @@ Array<Array<string>> [
 ./start-server.py            - Python launcher script
 ```
 
+## View Modes
+
+### Multi-Layer View (Default)
+- Displays all 3 layers stacked vertically
+- Each layer positioned 15 units apart on Y axis
+- Layer labels shown in front of each keyboard
+- Floating animation synchronized with phase offset
+- Camera positioned at (0, 20, 45) to view entire stack
+- Edit mode and interactions disabled in this view
+- Default selection: "All Layers (Stacked)"
+
+**Layer Positions:**
+- Default Layer: Y = 0
+- Lower Layer: Y = 15
+- Raise Layer: Y = 30
+
+### Single-Layer View
+- Displays only selected layer
+- Camera positioned at (0, 15, 25) for closer view
+- Edit mode and interactions enabled
+- Click modifier keys to see combinations
+- Click any key in edit mode to modify label
+
+### Switching Between Views
+- Use layer dropdown selector in info panel
+- "All Layers (Stacked)" → Multi-layer view
+- Selecting specific layer → Single-layer view
+- Keyboards rebuild dynamically when switching
+- Edit mode automatically disabled when switching to multi-layer
+
+## User Interactions
+
+### Multi-Layer View
+- **View Only**: No click interactions on keys
+- **Camera Controls**: Rotate, pan, zoom to explore
+- **Layer Switching**: Select dropdown to change view mode
+- **Visual**: See all layer relationships at once
+
+### Single-Layer View
+- **View Mode**: Click modifiers to see combinations
+- **Edit Mode**: Click any key to edit label
+- **Layer Switching**: Switch between individual layers
+- **Export**: Save modifications as JSON
+
 ### Configuration Files
 ```
 ../config/boards/shields/detun/detun.keymap  - ZMK keyboard config (SOURCE OF TRUTH)
@@ -403,6 +487,41 @@ Array<Array<string>> [
 ### Documentation
 ```
 ./README.md                  - User documentation
+
+## Implementation Notes
+
+### Multi-Layer Rendering
+1. Parse all layers from ZMK config on load
+2. Convert each layer to keymap format
+3. Store keymap with each layer object
+4. Create keyboard groups for each layer with vertical offset
+5. Generate layer labels as sprites positioned in front
+6. Add all groups and labels to scene
+7. Animate with phase-offset floating effect
+
+### Layer Spacing Calculation
+```javascript
+yPosition = layerIndex * KEYBOARD_CONFIG.layerSpacing;
+// layerIndex: 0 (default), 1 (lower), 2 (raise)
+// layerSpacing: 15 units
+// Results: 0, 15, 30
+```
+
+### Performance Considerations
+- Multi-layer view renders 6 keyboards (3 layers × 2 sides)
+- Total key count: ~42 keys × 3 layers = 126 keys
+- Each key has mesh + sprite = 252 objects
+- 60 FPS maintained on modern hardware
+- Raycasting disabled in multi-layer view for performance
+
+### Camera Framing
+- Multi-layer: FOV 75°, distance 45 units
+- Frames all 3 layers in vertical stack
+- Center target at Y=15 (middle layer)
+- Allows zoom from 15 to 80 units
+- Single-layer: FOV 75°, distance 25 units
+- Focused on single keyboard pair
+- Allows zoom from 10 to 50 units
 ./DEVELOPER.md               - Developer guide
 ./QUICKSTART.md              - Quick start guide
 ./START_HERE.md              - Simple launch instructions

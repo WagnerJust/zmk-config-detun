@@ -40,6 +40,15 @@ body {
     margin-bottom: 8px;
 }
 
+#info .layer-view-note {
+    background: rgba(255, 152, 0, 0.2);
+    border-left: 3px solid #ff9800;
+    padding: 8px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
 .controls-section {
     margin: 15px 0;
     padding: 10px 0;
@@ -115,13 +124,14 @@ body {
 .legend {
     position: absolute;
     bottom: 20px;
-    left: 20px;
+    right: 20px;
     color: white;
     background: rgba(0, 0, 0, 0.6);
     padding: 15px;
     border-radius: 10px;
     z-index: 100;
     backdrop-filter: blur(10px);
+    max-width: 200px;
 }
 
 .legend-item {

@@ -5,9 +5,9 @@
  * @returns {THREE.Scene}
  */
 export function createScene() {
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
-    return scene;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1a1a2e);
+  return scene;
 }
 
 /**
@@ -15,15 +15,16 @@ export function createScene() {
  * @returns {THREE.PerspectiveCamera}
  */
 export function createCamera() {
-    const camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
-    );
-    camera.position.set(0, 15, 25);
-    camera.lookAt(0, 0, 0);
-    return camera;
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000,
+  );
+  // Position camera to view all 3 layers stacked vertically
+  camera.position.set(0, 20, 45);
+  camera.lookAt(0, 15, 0); // Look at middle layer
+  return camera;
 }
 
 /**
@@ -32,12 +33,12 @@ export function createCamera() {
  * @returns {THREE.WebGLRenderer}
  */
 export function createRenderer(container) {
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    container.appendChild(renderer.domElement);
-    return renderer;
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
+  return renderer;
 }
 
 /**
@@ -47,12 +48,13 @@ export function createRenderer(container) {
  * @returns {THREE.OrbitControls}
  */
 export function createControls(camera, domElement) {
-    const controls = new THREE.OrbitControls(camera, domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance = 10;
-    controls.maxDistance = 50;
-    return controls;
+  const controls = new THREE.OrbitControls(camera, domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.minDistance = 15;
+  controls.maxDistance = 80; // Increased to allow viewing all layers
+  controls.target.set(0, 15, 0); // Target middle of layer stack
+  return controls;
 }
 
 /**
@@ -60,28 +62,28 @@ export function createControls(camera, domElement) {
  * @param {THREE.Scene} scene - The scene to add lights to
  */
 export function setupLights(scene) {
-    // Ambient light for overall illumination
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
+  // Ambient light for overall illumination
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
 
-    // Directional light for shadows
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(10, 20, 10);
-    directionalLight.castShadow = true;
-    directionalLight.shadow.camera.left = -30;
-    directionalLight.shadow.camera.right = 30;
-    directionalLight.shadow.camera.top = 30;
-    directionalLight.shadow.camera.bottom = -30;
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
-    scene.add(directionalLight);
+  // Directional light for shadows
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(10, 35, 10); // Higher to illuminate all layers
+  directionalLight.castShadow = true;
+  directionalLight.shadow.camera.left = -30;
+  directionalLight.shadow.camera.right = 30;
+  directionalLight.shadow.camera.top = 40; // Increased for vertical stack
+  directionalLight.shadow.camera.bottom = -10;
+  directionalLight.shadow.mapSize.width = 2048;
+  directionalLight.shadow.mapSize.height = 2048;
+  scene.add(directionalLight);
 
-    // Point light for accent
-    const pointLight = new THREE.PointLight(0x667eea, 0.5);
-    pointLight.position.set(-10, 10, 10);
-    scene.add(pointLight);
+  // Point light for accent
+  const pointLight = new THREE.PointLight(0x667eea, 0.5);
+  pointLight.position.set(-10, 10, 10);
+  scene.add(pointLight);
 
-    return { ambientLight, directionalLight, pointLight };
+  return { ambientLight, directionalLight, pointLight };
 }
 
 /**
@@ -89,17 +91,17 @@ export function setupLights(scene) {
  * @returns {THREE.Mesh}
  */
 export function createGround() {
-    const groundGeometry = new THREE.PlaneGeometry(50, 50);
-    const groundMaterial = new THREE.MeshStandardMaterial({
-        color: 0x0f0f1e,
-        roughness: 0.8,
-        metalness: 0.2
-    });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -0.5;
-    ground.receiveShadow = true;
-    return ground;
+  const groundGeometry = new THREE.PlaneGeometry(50, 50);
+  const groundMaterial = new THREE.MeshStandardMaterial({
+    color: 0x0f0f1e,
+    roughness: 0.8,
+    metalness: 0.2,
+  });
+  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.5;
+  ground.receiveShadow = true;
+  return ground;
 }
 
 /**
@@ -108,9 +110,9 @@ export function createGround() {
  * @param {THREE.WebGLRenderer} renderer - The renderer to update
  */
 export function handleResize(camera, renderer) {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 /**
@@ -119,24 +121,24 @@ export function handleResize(camera, renderer) {
  * @returns {Object} - Object containing all scene components
  */
 export function initScene(container) {
-    const scene = createScene();
-    const camera = createCamera();
-    const renderer = createRenderer(container);
-    const controls = createControls(camera, renderer.domElement);
-    const lights = setupLights(scene);
-    const ground = createGround();
+  const scene = createScene();
+  const camera = createCamera();
+  const renderer = createRenderer(container);
+  const controls = createControls(camera, renderer.domElement);
+  const lights = setupLights(scene);
+  const ground = createGround();
 
-    scene.add(ground);
+  scene.add(ground);
 
-    // Setup resize handler
-    window.addEventListener('resize', () => handleResize(camera, renderer));
+  // Setup resize handler
+  window.addEventListener("resize", () => handleResize(camera, renderer));
 
-    return {
-        scene,
-        camera,
-        renderer,
-        controls,
-        lights,
-        ground
-    };
+  return {
+    scene,
+    camera,
+    renderer,
+    controls,
+    lights,
+    ground,
+  };
 }
