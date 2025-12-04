@@ -5,7 +5,10 @@
 set -e
 
 PORT=8000
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get the keyboard-visualizer directory
+VISUALIZER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Go up one level to serve from project root (so config/ is accessible)
+DIR="$(cd "$VISUALIZER_DIR/.." && pwd)"
 
 echo "============================================================"
 echo "🎹 Detun Keyboard Visualizer Launcher"
@@ -44,8 +47,8 @@ if command -v python3 &> /dev/null; then
     echo "============================================================"
     echo ""
 
-    # Open browser after a short delay
-    (sleep 2 && open "$URL" 2>/dev/null || xdg-open "$URL" 2>/dev/null || echo "Please open $URL in your browser") &
+    # Open browser after a short delay (open keyboard-visualizer subdirectory)
+    (sleep 2 && open "$URL/keyboard-visualizer/" 2>/dev/null || xdg-open "$URL/keyboard-visualizer/" 2>/dev/null || echo "Please open $URL/keyboard-visualizer/ in your browser") &
 
     python3 -m http.server $PORT
 
@@ -57,7 +60,7 @@ elif command -v python &> /dev/null; then
     echo "============================================================"
     echo ""
 
-    (sleep 2 && open "$URL" 2>/dev/null || xdg-open "$URL" 2>/dev/null || echo "Please open $URL in your browser") &
+    (sleep 2 && open "$URL/keyboard-visualizer/" 2>/dev/null || xdg-open "$URL/keyboard-visualizer/" 2>/dev/null || echo "Please open $URL/keyboard-visualizer/ in your browser") &
 
     python -m SimpleHTTPServer $PORT
 
@@ -69,7 +72,7 @@ elif command -v php &> /dev/null; then
     echo "============================================================"
     echo ""
 
-    (sleep 2 && open "$URL" 2>/dev/null || xdg-open "$URL" 2>/dev/null || echo "Please open $URL in your browser") &
+    (sleep 2 && open "$URL/keyboard-visualizer/" 2>/dev/null || xdg-open "$URL/keyboard-visualizer/" 2>/dev/null || echo "Please open $URL/keyboard-visualizer/ in your browser") &
 
     php -S localhost:$PORT
 
@@ -81,7 +84,7 @@ elif command -v npx &> /dev/null; then
     echo "============================================================"
     echo ""
 
-    (sleep 2 && open "$URL" 2>/dev/null || xdg-open "$URL" 2>/dev/null || echo "Please open $URL in your browser") &
+    (sleep 2 && open "$URL/keyboard-visualizer/" 2>/dev/null || xdg-open "$URL/keyboard-visualizer/" 2>/dev/null || echo "Please open $URL/keyboard-visualizer/ in your browser") &
 
     npx -y serve -l $PORT
 
