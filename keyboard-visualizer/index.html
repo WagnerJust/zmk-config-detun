@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detun Keyboard Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 300px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        #info h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #info p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        #canvas {
+            display: block;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="loading" id="loading">Loading...</div>
+
+        <div id="info">
+            <h1>Detun Keyboard</h1>
+            <p><strong>60 Keys Split Layout</strong></p>
+            <p>6 columns × 5 rows per side</p>
+            <p><strong>Controls:</strong></p>
+            <p></p>🖱️ Left click + drag to rotate</p>
+            <p>🖱️ Right click + drag to pan</p>
+            <p>🖱️ Scroll to zoom</p>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4CAF50;"></div>
+                <span>Letters</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2196F3;"></div>
+                <span>Numbers</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FF9800;"></div>
+                <span>Modifiers</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #9C27B0;"></div>
+                <span>Special</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #F44336;"></div>
+                <span>Navigation</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // Keymap data from the ZMK configuration
+        const keymap = [
+            // Row 1 (top)
+            ['ESC', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'BSPC'],
+            // Row 2
+            ['TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '\\'],
+            // Row 3
+            ['CAPS', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'"],
+            // Row 4
+            ['SHFT', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'SHFT'],
+            // Row 5 (bottom)
+            ['CTRL', 'GUI', 'ALT', '-', '=', 'SPC', 'ENT', '[', ']', 'ALT', 'GUI', 'CTRL']
+        ];
+
+        // Key color mapping based on type
+        function getKeyColor(keyLabel) {
+            const letters = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+            const numbers = '1234567890';
+            const modifiers = ['CTRL', 'GUI', 'ALT', 'SHFT', 'TAB', 'CAPS', 'ESC'];
+            const navigation = ['BSPC', 'ENT', 'SPC'];
+
+            if (letters.includes(keyLabel)) {
+                return 0x4CAF50; // Green for letters
+            } else if (numbers.includes(keyLabel)) {
+                return 0x2196F3; // Blue for numbers
+            } else if (modifiers.includes(keyLabel)) {
+                return 0xFF9800; // Orange for modifiers
+            } else if (navigation.includes(keyLabel)) {
+                return 0xF44336; // Red for navigation
+            } else {
+                return 0x9C27B0; // Purple for special characters
+            }
+        }
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a2e);
+
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        camera.position.set(0, 15, 25);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.getElementById('container').appendChild(renderer.domElement);
+
+        // Orbit controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 10;
+        controls.maxDistance = 50;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 20, 10);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.camera.left = -30;
+        directionalLight.shadow.camera.right = 30;
+        directionalLight.shadow.camera.top = 30;
+        directionalLight.shadow.camera.bottom = -30;
+        scene.add(directionalLight);
+
+        const pointLight = new THREE.PointLight(0x667eea, 0.5);
+        pointLight.position.set(-10, 10, 10);
+        scene.add(pointLight);
+
+        // Create keyboard function
+        function createKeyboard(keymap, offsetX) {
+            const group = new THREE.Group();
+            const keyWidth = 2;
+            const keyHeight = 0.5;
+            const keyDepth = 2;
+            const spacing = 0.3;
+
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 6; col++) {
+                    const keyIndex = offsetX < 0 ? col : col + 6;
+                    const keyLabel = keymap[row][keyIndex];
+
+                    // Create key
+                    const geometry = new THREE.BoxGeometry(keyWidth, keyHeight, keyDepth);
+                    const material = new THREE.MeshStandardMaterial({
+                        color: getKeyColor(keyLabel),
+                        roughness: 0.4,
+                        metalness: 0.6
+                    });
+                    const key = new THREE.Mesh(geometry, material);
+
+                    // Position key
+                    const x = col * (keyWidth + spacing);
+                    const y = 0;
+                    const z = row * (keyDepth + spacing);
+                    key.position.set(x, y, z);
+                    key.castShadow = true;
+                    key.receiveShadow = true;
+
+                    // Add slight rotation for ergonomic look
+                    const tilt = offsetX < 0 ? 0.05 : -0.05;
+                    key.rotation.y = tilt;
+
+                    group.add(key);
+
+                    // Create text label
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = 256;
+                    canvas.height = 256;
+                    context.fillStyle = 'white';
+                    context.font = 'bold 80px Arial';
+                    context.textAlign = 'center';
+                    context.textBaseline = 'middle';
+
+                    // Handle multi-character labels
+                    const fontSize = keyLabel.length > 2 ? 50 : 80;
+                    context.font = `bold ${fontSize}px Arial`;
+                    context.fillText(keyLabel, 128, 128);
+
+                    const texture = new THREE.CanvasTexture(canvas);
+                    const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+                    const sprite = new THREE.Sprite(spriteMaterial);
+                    sprite.position.set(x, y + keyHeight / 2 + 0.3, z);
+                    sprite.scale.set(1.5, 1.5, 1);
+                    group.add(sprite);
+                }
+            }
+
+            group.position.x = offsetX;
+            return group;
+        }
+
+        // Create left and right keyboards with significant spacing
+        const leftKeyboard = createKeyboard(keymap, -12);
+        const rightKeyboard = createKeyboard(keymap, 6);
+        scene.add(leftKeyboard);
+        scene.add(rightKeyboard);
+
+        // Add ground plane
+        const groundGeometry = new THREE.PlaneGeometry(50, 50);
+        const groundMaterial = new THREE.MeshStandardMaterial({
+            color: 0x0f0f1e,
+            roughness: 0.8,
+            metalness: 0.2
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.5;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Gentle floating animation
+            const time = Date.now() * 0.001;
+            leftKeyboard.position.y = Math.sin(time * 0.5) * 0.1;
+            rightKeyboard.position.y = Math.sin(time * 0.5 + Math.PI) * 0.1;
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Hide loading screen
+        document.getElementById('loading').style.display = 'none';
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
