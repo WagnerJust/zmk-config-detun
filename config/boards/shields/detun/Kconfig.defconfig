@@ -14,3 +14,10 @@ config ZMK_SPLIT
     default y
 
 endif
+
+if SHIELD_DETUN_TEST
+
+config ZMK_KEYBOARD_NAME
+    default "Detun Test"
+
+endif

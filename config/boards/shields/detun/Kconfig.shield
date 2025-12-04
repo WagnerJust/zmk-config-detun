@@ -3,3 +3,6 @@ config SHIELD_DETUN_LEFT
 
 config SHIELD_DETUN_RIGHT
     def_bool $(shields_list_contains,detun_right)
+
+config SHIELD_DETUN_TEST
+    def_bool $(shields_list_contains,detun_test)
