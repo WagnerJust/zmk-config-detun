@@ -222,3 +222,96 @@ export function animateFloating(leftKeyboard, rightKeyboard, time) {
   leftKeyboard.position.y = Math.sin(time * 0.5) * 0.1;
   rightKeyboard.position.y = Math.sin(time * 0.5 + Math.PI) * 0.1;
 }
+
+/**
+ * Update a key's label and color
+ * @param {Object} keyObj - Key object to update
+ * @param {string} newLabel - New label for the key
+ */
+export function updateKeyLabel(keyObj, newLabel) {
+  // Update label
+  keyObj.label = newLabel;
+  keyObj.mesh.userData.label = newLabel;
+
+  // Update color
+  const newColor = getKeyColor(newLabel);
+  keyObj.mesh.material.color.setHex(newColor);
+  keyObj.mesh.userData.originalColor = newColor;
+
+  // Update sprite texture
+  const texture = createTextTexture(newLabel);
+  keyObj.sprite.material.map = texture;
+  keyObj.sprite.material.needsUpdate = true;
+
+  console.log(`🔄 Updated key to: ${newLabel}`);
+}
+
+/**
+ * Rebuild keyboards with new keymap
+ * @param {THREE.Scene} scene - The Three.js scene
+ * @param {THREE.Group} leftKeyboard - Left keyboard group
+ * @param {THREE.Group} rightKeyboard - Right keyboard group
+ * @param {Array} newKeymap - New keymap to display
+ * @returns {Object} - New keyboard groups
+ */
+export function rebuildKeyboards(
+  scene,
+  leftKeyboard,
+  rightKeyboard,
+  newKeymap,
+) {
+  // Remove old keyboards from scene
+  scene.remove(leftKeyboard);
+  scene.remove(rightKeyboard);
+
+  // Dispose of old geometries and materials
+  leftKeyboard.traverse((child) => {
+    if (child.geometry) child.geometry.dispose();
+    if (child.material) {
+      if (child.material.map) child.material.map.dispose();
+      child.material.dispose();
+    }
+  });
+  rightKeyboard.traverse((child) => {
+    if (child.geometry) child.geometry.dispose();
+    if (child.material) {
+      if (child.material.map) child.material.map.dispose();
+      child.material.dispose();
+    }
+  });
+
+  // Clear key objects array
+  keyObjects.length = 0;
+
+  // Create new keyboards
+  const newKeyboards = createKeyboards(newKeymap);
+
+  // Add to scene
+  scene.add(newKeyboards.leftKeyboard);
+  scene.add(newKeyboards.rightKeyboard);
+
+  console.log("🔄 Rebuilt keyboards with new keymap");
+  return newKeyboards;
+}
+
+/**
+ * Highlight modified key
+ * @param {Object} keyObj - Key object to mark as modified
+ */
+export function markKeyAsModified(keyObj) {
+  keyObj.mesh.userData.isModified = true;
+  // Add a subtle glow to show it's modified
+  const material = keyObj.mesh.material;
+  material.emissive.setHex(0xff9800);
+  material.emissiveIntensity = 0.3;
+}
+
+/**
+ * Find key object by position
+ * @param {number} row - Row index (0-4)
+ * @param {number} col - Column index (0-11)
+ * @returns {Object|null} - Key object or null if not found
+ */
+export function findKeyByPosition(row, col) {
+  return keyObjects.find((obj) => obj.row === row && obj.col === col) || null;
+}

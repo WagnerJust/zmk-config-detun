@@ -1,9 +1,24 @@
 // Main application file - Orchestrates all modules
 
-import { initKeymapData, getKeymap } from "./keymap-data.js";
+import {
+  initKeymapData,
+  getKeymap,
+  getLayers,
+  getCurrentLayerName,
+  switchLayer,
+  exportKeymap,
+} from "./keymap-data.js";
 import { initScene } from "./scene.js";
-import { createKeyboards, animateFloating } from "./keyboard.js";
-import { setupInteractions } from "./interactions.js";
+import {
+  createKeyboards,
+  animateFloating,
+  rebuildKeyboards,
+} from "./keyboard.js";
+import {
+  setupInteractions,
+  toggleEditMode,
+  isEditModeActive,
+} from "./interactions.js";
 
 /**
  * Application state
@@ -86,6 +101,12 @@ async function init() {
         configSource.style.color = "#ff9800";
       }
     }
+
+    // Populate layer selector
+    populateLayerSelector();
+
+    // Setup UI controls
+    setupUIControls();
 
     // Hide loading screen
     if (loading) {
@@ -184,6 +205,127 @@ function setupEventListeners() {
       }
     }
   });
+}
+
+/**
+ * Populate layer selector dropdown
+ */
+function populateLayerSelector() {
+  const layerSelect = document.getElementById("layer-select");
+  const layers = getLayers();
+  const currentLayer = getCurrentLayerName();
+
+  // Clear existing options
+  layerSelect.innerHTML = "";
+
+  // Add layer options
+  Object.keys(layers).forEach((layerName) => {
+    const option = document.createElement("option");
+    option.value = layerName;
+    option.textContent =
+      layers[layerName].displayName || layerName.toUpperCase();
+    if (layerName === currentLayer) {
+      option.selected = true;
+    }
+    layerSelect.appendChild(option);
+  });
+
+  console.log(
+    "📋 Layer selector populated with",
+    Object.keys(layers).length,
+    "layers",
+  );
+}
+
+/**
+ * Handle layer switching
+ */
+function handleLayerSwitch(layerName) {
+  if (switchLayer(layerName)) {
+    const newKeymap = getKeymap();
+
+    // Rebuild keyboards with new layer
+    const newKeyboards = rebuildKeyboards(
+      app.scene,
+      app.leftKeyboard,
+      app.rightKeyboard,
+      newKeymap,
+    );
+
+    // Update app references
+    app.leftKeyboard = newKeyboards.leftKeyboard;
+    app.rightKeyboard = newKeyboards.rightKeyboard;
+
+    console.log("✅ Layer switched and keyboards rebuilt");
+  }
+}
+
+/**
+ * Handle edit mode toggle
+ */
+function handleEditModeToggle() {
+  const isActive = toggleEditMode();
+  const toggleBtn = document.getElementById("edit-mode-toggle");
+  const exportBtn = document.getElementById("export-keymap");
+  const interactiveHelp = document.getElementById("interactive-help");
+
+  if (isActive) {
+    toggleBtn.textContent = "Edit Mode: ON";
+    toggleBtn.classList.add("active");
+    exportBtn.style.display = "inline-block";
+    interactiveHelp.textContent = "✏️ Click any key to edit its label!";
+  } else {
+    toggleBtn.textContent = "Edit Mode: OFF";
+    toggleBtn.classList.remove("active");
+    exportBtn.style.display = "none";
+    interactiveHelp.textContent = "🖱️ Click modifier keys to see combinations!";
+  }
+}
+
+/**
+ * Handle keymap export
+ */
+function handleExportKeymap() {
+  const exportData = exportKeymap();
+  const dataStr = JSON.stringify(exportData, null, 2);
+  const dataUri =
+    "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+  const exportFileDefaultName = `detun-keymap-${exportData.currentLayer}-${Date.now()}.json`;
+
+  const linkElement = document.createElement("a");
+  linkElement.setAttribute("href", dataUri);
+  linkElement.setAttribute("download", exportFileDefaultName);
+  linkElement.click();
+
+  console.log("💾 Keymap exported:", exportFileDefaultName);
+}
+
+/**
+ * Setup UI control event listeners
+ */
+function setupUIControls() {
+  // Layer selector
+  const layerSelect = document.getElementById("layer-select");
+  if (layerSelect) {
+    layerSelect.addEventListener("change", (event) => {
+      handleLayerSwitch(event.target.value);
+    });
+  }
+
+  // Edit mode toggle
+  const editModeToggle = document.getElementById("edit-mode-toggle");
+  if (editModeToggle) {
+    editModeToggle.addEventListener("click", handleEditModeToggle);
+  }
+
+  // Export button
+  const exportBtn = document.getElementById("export-keymap");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", handleExportKeymap);
+  }
+
+  console.log("🎛️  UI controls initialized");
 }
 
 /**

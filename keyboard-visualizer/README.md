@@ -7,11 +7,16 @@ A beautiful, interactive 3D web-based visualizer for your Detun 60-key split key
 - **3D Visualization**: See your keyboard layout in an interactive 3D space
 - **Split Layout**: Left and right keyboards positioned separately (30 keys each)
 - **Color-Coded Keys**: Different colors for letters, numbers, modifiers, special characters, and navigation keys
+- **Layer Switching**: Switch between different keyboard layers (Default, Lower, Raise, etc.)
+- **Edit Mode**: Click any key to edit its label interactively
+- **Modification Tracking**: Visual indication of modified keys with orange glow
+- **Export Functionality**: Export modified keymaps as JSON files
 - **Interactive Combinations**: Click on modifier keys (Ctrl, Shift, Alt, GUI) to see available key combinations
 - **Real-time Feedback**: Keys highlight and dim based on available combinations
 - **Interactive Controls**: Rotate, pan, and zoom to explore your keyboard from any angle
 - **Hover Effects**: Modifier keys glow when you hover over them
 - **Smooth Animations**: Gentle floating animation for visual appeal
+- **ZMK Config Sync**: Automatically loads keymap from your ZMK configuration files
 - **Modular Architecture**: Clean, maintainable code split into logical modules
 
 ## 📁 Project Structure
@@ -66,16 +71,50 @@ The launcher scripts will:
 
 ### Controls
 
+#### View Mode (Default)
 - **🖱️ Left Click + Drag**: Rotate the view around the keyboards
 - **🖱️ Right Click + Drag**: Pan the view left/right/up/down
 - **🖱️ Scroll Wheel**: Zoom in and out
 - **🖱️ Click Modifier Key**: Show available key combinations
-- **ESC Key**: Close combinations panel
-- **×  Button**: Close combinations panel
+- **ESC Key**: Close panels
+- **×  Button**: Close panels
+
+#### Edit Mode
+- **🖱️ Click Any Key**: Open edit panel to change key label
+- **Quick Keys**: Use preset buttons for common keys (CTRL, SHFT, ALT, etc.)
+- **Enter**: Save changes
+- **ESC**: Cancel editing
 
 ## 🎮 Interactive Features
 
-### Key Combinations
+### Layer Switching
+
+Use the layer dropdown in the top-left panel to switch between keyboard layers:
+
+1. **Select a Layer**: Choose from Default, Lower, Raise, or other configured layers
+2. **View Updates**: The keyboard instantly rebuilds to show the selected layer
+3. **Edit Per Layer**: Modifications are tracked separately for each layer
+4. **Layer Indicators**: Current layer name is displayed prominently
+
+### Edit Mode
+
+Toggle edit mode to customize your keyboard layout:
+
+1. **Enable Edit Mode**: Click "Edit Mode: OFF" button to toggle ON
+2. **Click Any Key**: Select a key to edit
+3. **Edit Panel Opens**: Shows current position and label
+4. **Type New Label**: Enter a custom label (up to 10 characters)
+5. **Use Quick Keys**: Click preset buttons for common keys
+6. **Save Changes**: Press Enter or click Save button
+7. **Visual Feedback**: Modified keys glow orange
+
+**Edit Mode Features:**
+- All keys are clickable (not just modifiers)
+- Modified keys have an orange glow to indicate changes
+- Changes are tracked per layer
+- Export button appears to save your modifications
+
+### Key Combinations (View Mode)
 
 Click on any modifier key to see what combinations are available:
 
@@ -92,10 +131,12 @@ When a modifier is selected:
 
 ### Visual Feedback
 
-- **Hover**: Modifier keys glow slightly when you hover over them
+- **Hover**: Modifier keys (or all keys in edit mode) glow slightly when you hover
 - **Selection**: Selected modifier scales up and glows brightly
 - **Highlighting**: Available keys emit light to show they're interactive
 - **Dimming**: Unavailable keys become semi-transparent
+- **Modified Keys**: Keys with edits show an orange glow (0.3 intensity)
+- **Edit Hover**: Green glow when hovering over keys in edit mode
 
 ## 🎨 Color Legend
 
@@ -131,14 +172,30 @@ Row 5: ENT  [   ]  ALT GUI CTRL
 
 ### Modifying the Keymap
 
-Edit `keymap-data.js` to change key labels:
+**Option 1: Use Edit Mode (Recommended)**
+1. Click "Edit Mode: OFF" to enable edit mode
+2. Click any key you want to change
+3. Type the new label or use quick keys
+4. Save your changes
+5. Click "Export Keymap" to download as JSON
+
+**Option 2: Edit Code Directly**
+
+Edit `keymap-data.js` to change default key labels:
 
 ```javascript
 export const keymap = [
-    ['ESC', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'BSPC'],
+    ['TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'BSPC'],
     // ... modify as needed
 ];
 ```
+
+**Option 3: Edit ZMK Config**
+
+The visualizer automatically loads from your ZMK keymap file at:
+`../config/boards/shields/detun/detun.keymap`
+
+Edit that file and refresh the visualizer to see changes.
 
 ### Adding Key Combinations
 
@@ -261,20 +318,49 @@ export function getKeyColor(keyLabel) {
 - `./start.sh` (Mac/Linux) or `python3 start-server.py`
 - ES6 modules don't work with `file://` protocol in most browsers
 
+## 💾 Exporting Your Keymap
+
+After making modifications in edit mode:
+
+1. Click "Export Keymap" button (appears when edit mode is ON)
+2. A JSON file downloads with your changes
+3. File includes:
+   - Current keymap state
+   - All layer definitions
+   - Modification history
+   - Timestamp
+
+**Export Format:**
+```json
+{
+  "keymap": [...],
+  "layers": {...},
+  "currentLayer": "default",
+  "modifications": {...},
+  "hasModifications": true,
+  "exportedAt": "2024-12-20T10:30:00.000Z"
+}
+```
+
 ## 🚀 Future Enhancements
 
-Potential features to add:
+Completed features:
+- [x] Layer switching visualization (show different keyboard layers)
+- [x] Load keymap from ZMK .keymap file directly
+- [x] Interactive key editing
+- [x] Export keyboard layout as JSON
 
-- [ ] Layer switching visualization (show different keyboard layers)
+Potential features to add:
+- [ ] Import keymap from JSON
+- [ ] Sync edits back to ZMK config files
 - [ ] Custom color themes (dark mode, light mode, custom palettes)
 - [ ] Export keyboard layout as image
-- [ ] Load keymap from ZMK .keymap file directly
 - [ ] Animation when "pressing" keys
 - [ ] Sound effects for key interactions
 - [ ] VR/AR support for immersive viewing
 - [ ] Keyboard layout comparison tool
 - [ ] Real-time keystroke visualization
-- [ ] Save/load custom configurations
+- [ ] Undo/redo functionality for edits
 
 ## 🤝 Contributing
 
@@ -291,11 +377,24 @@ This visualizer is part of your ZMK keyboard configuration. Feel free to modify 
 
 ## 🎯 Tips
 
+### General Usage
 - **Launch with the script**: `./start.sh` or `python3 start-server.py`
+- The visualizer automatically loads your ZMK configuration
+- If ZMK config can't be loaded, it falls back to a default layout
+
+### View Mode Tips
 - Click on **Ctrl** to see common shortcuts you can use with your keyboard
 - Try clicking **Shift** to see what symbols each key produces
 - The **GUI** key shows system-level shortcuts (⊞ Win key on Windows, ⌘ Cmd on Mac)
 - **Alt** combinations show menu and window management shortcuts
+
+### Edit Mode Tips
+- Use the layer dropdown before editing to modify specific layers
+- Modified keys glow orange so you can track your changes
+- Quick key buttons speed up common edits (CTRL, SHFT, SPC, etc.)
+- Press Enter to quickly save while typing in the label field
+- Export your changes before refreshing to avoid losing modifications
+- Labels can be up to 10 characters long
 
 ---
 

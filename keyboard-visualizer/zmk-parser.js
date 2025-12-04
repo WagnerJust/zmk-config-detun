@@ -626,10 +626,18 @@ export async function loadKeymapFromZMK() {
     console.log("✅ Successfully parsed ZMK keymap");
     console.log("📋 Layers found:", Object.keys(layers));
 
-    // Convert default layer to keymap format
+    // Convert all layers to keymap format and store with each layer
+    for (const [name, layer] of Object.entries(layers)) {
+      const keymap = convertLayerToKeymap(layer);
+      if (keymap) {
+        layers[name].keymap = keymap;
+      }
+    }
+
+    // Get default layer
     const defaultLayer =
       layers.default || layers.base || Object.values(layers)[0];
-    const keymap = convertLayerToKeymap(defaultLayer);
+    const keymap = defaultLayer.keymap;
 
     if (!keymap) {
       console.warn("⚠️  Could not convert layer to keymap format");

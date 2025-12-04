@@ -20,12 +20,35 @@
                 >
                     📂 Loading configuration...
                 </p>
+
+                <div class="controls-section">
+                    <label for="layer-select">Layer:</label>
+                    <select id="layer-select">
+                        <option value="default">Default</option>
+                    </select>
+                </div>
+
+                <div class="controls-section">
+                    <button id="edit-mode-toggle" class="btn">
+                        Edit Mode: OFF
+                    </button>
+                    <button
+                        id="export-keymap"
+                        class="btn btn-secondary"
+                        style="display: none"
+                    >
+                        Export Keymap
+                    </button>
+                </div>
+
                 <p><strong>Controls:</strong></p>
                 <p>🖱️ Left click + drag to rotate</p>
                 <p>🖱️ Right click + drag to pan</p>
                 <p>🖱️ Scroll to zoom</p>
                 <p><strong>Interactive:</strong></p>
-                <p>🖱️ Click modifier keys to see combinations!</p>
+                <p id="interactive-help">
+                    🖱️ Click modifier keys to see combinations!
+                </p>
             </div>
 
             <div class="legend">
@@ -55,6 +78,73 @@
                 <button class="close-btn">×</button>
                 <h2>Key Combinations</h2>
                 <div id="combinations-list"></div>
+            </div>
+
+            <div id="edit-panel">
+                <button class="close-btn">×</button>
+                <h2>Edit Key</h2>
+                <div class="edit-content">
+                    <div class="edit-field">
+                        <label>Position:</label>
+                        <span id="edit-position"></span>
+                    </div>
+                    <div class="edit-field">
+                        <label>Current Label:</label>
+                        <input
+                            type="text"
+                            id="edit-label"
+                            placeholder="Enter key label"
+                            maxlength="10"
+                        />
+                    </div>
+                    <div class="edit-field">
+                        <label>Common Keys:</label>
+                        <div class="quick-keys">
+                            <button class="quick-key" data-value="A">A</button>
+                            <button class="quick-key" data-value="CTRL">
+                                CTRL
+                            </button>
+                            <button class="quick-key" data-value="SHFT">
+                                SHFT
+                            </button>
+                            <button class="quick-key" data-value="ALT">
+                                ALT
+                            </button>
+                            <button class="quick-key" data-value="GUI">
+                                GUI
+                            </button>
+                            <button class="quick-key" data-value="SPC">
+                                SPC
+                            </button>
+                            <button class="quick-key" data-value="ENT">
+                                ENT
+                            </button>
+                            <button class="quick-key" data-value="BSPC">
+                                BSPC
+                            </button>
+                            <button class="quick-key" data-value="TAB">
+                                TAB
+                            </button>
+                            <button class="quick-key" data-value="ESC">
+                                ESC
+                            </button>
+                            <button class="quick-key" data-value="L1">
+                                L1
+                            </button>
+                            <button class="quick-key" data-value="L2">
+                                L2
+                            </button>
+                            <button class="quick-key" data-value="✕">✕</button>
+                            <button class="quick-key" data-value="▽">▽</button>
+                        </div>
+                    </div>
+                    <div class="edit-actions">
+                        <button id="save-key" class="btn">Save</button>
+                        <button id="cancel-edit" class="btn btn-secondary">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 

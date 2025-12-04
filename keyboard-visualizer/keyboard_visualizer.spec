@@ -21,6 +21,11 @@
 - FR-006: Parse and display ZMK keycodes correctly
 - FR-007: Graceful fallback to default keymap if ZMK config unavailable
 - FR-008: Real-time visual feedback for key interactions
+- FR-009: Layer switching UI to display different keyboard layers
+- FR-010: Edit mode to modify key labels interactively
+- FR-011: Visual indication of modified keys
+- FR-012: Export modified keymap as JSON
+- FR-013: Track modification history per layer
 
 ### Non-Functional Requirements
 - NFR-001: Load and render within 3 seconds

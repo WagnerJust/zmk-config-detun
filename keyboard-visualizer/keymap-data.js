@@ -25,6 +25,10 @@ export let keymap = defaultKeymap;
 export let layers = {};
 export let currentLayerName = "default";
 
+// Track modifications to the keymap
+export let keymapModifications = {};
+export let hasModifications = false;
+
 // Key color mapping
 export const keyColors = {
   letters: 0x4caf50, // Green
@@ -231,9 +235,95 @@ export function getCurrentLayerName() {
 export function switchLayer(layerName) {
   if (layers[layerName]) {
     currentLayerName = layerName;
+
+    // Update the keymap to show this layer
+    if (layers[layerName].keymap) {
+      keymap = layers[layerName].keymap;
+    }
+
     console.log("🔄 Switched to layer:", layerName);
     return true;
   }
   console.warn("⚠️  Layer not found:", layerName);
   return false;
+}
+
+/**
+ * Update a key label at a specific position
+ * @param {number} row - Row index (0-4)
+ * @param {number} col - Column index (0-11)
+ * @param {string} newLabel - New label for the key
+ */
+export function updateKeyLabel(row, col, newLabel) {
+  if (row >= 0 && row < keymap.length && col >= 0 && col < keymap[row].length) {
+    const oldLabel = keymap[row][col];
+    keymap[row][col] = newLabel;
+
+    // Track modification
+    const key = `${currentLayerName}:${row}:${col}`;
+    keymapModifications[key] = {
+      layer: currentLayerName,
+      row,
+      col,
+      oldLabel,
+      newLabel,
+      timestamp: Date.now(),
+    };
+
+    hasModifications = true;
+    console.log(
+      `✏️  Updated key at [${row},${col}]: ${oldLabel} → ${newLabel}`,
+    );
+    return true;
+  }
+  console.warn(`⚠️  Invalid position: [${row},${col}]`);
+  return false;
+}
+
+/**
+ * Check if a key has been modified
+ * @param {number} row - Row index
+ * @param {number} col - Column index
+ * @returns {boolean}
+ */
+export function isKeyModified(row, col) {
+  const key = `${currentLayerName}:${row}:${col}`;
+  return keymapModifications.hasOwnProperty(key);
+}
+
+/**
+ * Get all modifications as an object
+ * @returns {Object}
+ */
+export function getModifications() {
+  return {
+    modifications: keymapModifications,
+    hasChanges: hasModifications,
+    currentLayer: currentLayerName,
+    timestamp: Date.now(),
+  };
+}
+
+/**
+ * Export current keymap state as JSON
+ * @returns {Object}
+ */
+export function exportKeymap() {
+  return {
+    keymap: keymap,
+    layers: layers,
+    currentLayer: currentLayerName,
+    modifications: keymapModifications,
+    hasModifications: hasModifications,
+    exportedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Reset all modifications
+ */
+export function resetModifications() {
+  keymapModifications = {};
+  hasModifications = false;
+  console.log("🔄 Reset all modifications");
 }
