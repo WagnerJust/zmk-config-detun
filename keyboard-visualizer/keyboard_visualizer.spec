@@ -1,5 +1,5 @@
 # Keyboard Visualizer - Technical Specification
-# Version: 1.1.0
+# Version: 1.2.0
 # Last Updated: December 2024
 # Project: ZMK Detun Keyboard 3D Visualizer
 
@@ -19,6 +19,7 @@
 - Export complete ZMK configuration as zip archive
 - Modifier key combinations display
 - Full 3D camera controls (rotate, pan, zoom)
+- Customizable key colors with persistent storage
 
 ## Core Requirements
 
@@ -40,6 +41,9 @@
 - FR-015: Dynamic switching between single-layer and multi-layer views
 - FR-016: Layer labels showing display name for each keyboard layer
 - FR-017: Export complete ZMK configuration as zip archive with all required files
+- FR-018: Customizable key colors by type with real-time preview
+- FR-019: Persistent color preferences stored in browser localStorage
+- FR-020: Reset colors to default functionality
 
 ### Non-Functional Requirements
 - NFR-001: Load and render within 3 seconds
@@ -151,11 +155,27 @@
   - `getLayers()`: → Object
   - `getCurrentLayerName()`: → string
   - `switchLayer(name)`: → boolean
+  - `updateKeyLabel(row, col, newLabel)`: → boolean
+  - `isKeyModified(row, col)`: → boolean
+  - `getModifications()`: → Object
+  - `exportKeymap()`: → Object
+  - `resetModifications()`: → void
+  - `updateKeyColor(type, color)`: → boolean
+  - `saveCustomColors()`: → boolean
+  - `resetColorsToDefault()`: → boolean
+  - `getKeyColors()`: → Object
+  - `getDefaultKeyColors()`: → Object
   - `defaultKeymap`: Array<Array<string>>
-  - `keyColors`: Object
+  - `defaultKeyColors`: Object
+  - `keyColors`: Object (mutable, customizable)
   - `keyTypes`: Object
   - `keyCombinations`: Object
 - **Imports**: zmk-parser.js
+- **Color Management**:
+  - Default colors defined in `defaultKeyColors`
+  - Current colors in `keyColors` (can be customized)
+  - Colors auto-loaded from localStorage on module initialization
+  - Supports real-time color updates with keyboard rebuild
 
 #### zmk-parser.js (ZMK File Parser)
 - **Purpose**: Parse ZMK .keymap files and convert to visualizer format
@@ -340,7 +360,52 @@
   - `debounce(func, wait)`: → Function
   - `lerp(start, end, t)`: → number
   - `easeOutCubic(t)`: → number
-- **Imports**: None
+- **Imports**: keymap-data.js
+
+#### color-customization.js (Color Customization Handler)
+- **Purpose**: Handle color customization UI and persistence
+- **Responsibilities**:
+  - Initialize color picker UI
+  - Handle color input changes
+  - Apply custom colors to keyboard
+  - Save color preferences to localStorage
+  - Load saved color preferences
+  - Reset colors to defaults
+  - Real-time preview of color changes
+  - Update legend colors
+  - Trigger keyboard rebuild on color change
+- **Exports**:
+  - `initColorCustomization(rebuildCallback)`: → void
+  - `hexToNumber(hexColor)`: → number
+  - `numberToHex(colorNumber)`: → string
+- **Imports**: keymap-data.js, utils.js
+- **UI Elements**:
+  - Color picker inputs for each key type
+  - Apply button to save and apply changes
+  - Reset button to restore defaults
+  - Real-time legend preview
+  - Modal panel with close button
+- **Color Types Supported**:
+  - letters: Letter keys (A-Z)
+  - numbers: Number keys (0-9)
+  - modifiers: Modifier keys (Ctrl, Shift, Alt, etc.)
+  - navigation: Navigation keys (arrows, space, enter, etc.)
+  - special: Special characters and symbols
+  - layerSwitch: Layer switching keys (L1, L2, etc.)
+  - empty: Empty/transparent keys (✕, ▽)
+- **Storage**:
+  - localStorage key: "keyColors"
+  - Format: JSON object with color values as hex numbers
+  - Auto-load on application start
+  - Persist across sessions
+- **Interaction Flow**:
+  1. User clicks "Customize" button
+  2. Color picker panel opens
+  3. User adjusts colors (real-time legend preview)
+  4. User clicks "Apply Colors"
+  5. Colors saved to localStorage
+  6. Keyboard rebuilds with new colors
+  7. Panel closes or user continues editing
 
 #### styles.css (Visual Styling)
 - **Purpose**: All visual styling and UI elements

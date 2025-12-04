@@ -29,8 +29,8 @@ export let currentLayerName = "default";
 export let keymapModifications = {};
 export let hasModifications = false;
 
-// Key color mapping
-export const keyColors = {
+// Default key color mapping
+export const defaultKeyColors = {
   letters: 0x4caf50, // Green
   numbers: 0x2196f3, // Blue
   modifiers: 0xff9800, // Orange
@@ -39,6 +39,28 @@ export const keyColors = {
   layerSwitch: 0x00bcd4, // Cyan
   empty: 0x424242, // Dark gray
 };
+
+// Current key colors (can be customized)
+export let keyColors = { ...defaultKeyColors };
+
+// Load custom colors from localStorage if available
+function loadCustomColors() {
+  try {
+    const saved = localStorage.getItem("keyColors");
+    if (saved) {
+      const customColors = JSON.parse(saved);
+      keyColors = { ...defaultKeyColors, ...customColors };
+      console.log("✅ Loaded custom key colors from storage");
+      return true;
+    }
+  } catch (error) {
+    console.warn("⚠️  Failed to load custom colors:", error);
+  }
+  return false;
+}
+
+// Initialize colors on module load
+loadCustomColors();
 
 // Key type classification
 export const keyTypes = {
@@ -326,4 +348,64 @@ export function resetModifications() {
   keymapModifications = {};
   hasModifications = false;
   console.log("🔄 Reset all modifications");
+}
+
+/**
+ * Update key color for a specific type
+ * @param {string} type - Key type (letters, numbers, modifiers, etc.)
+ * @param {number} color - Hex color code
+ */
+export function updateKeyColor(type, color) {
+  if (keyColors.hasOwnProperty(type)) {
+    keyColors[type] = color;
+    console.log(
+      `🎨 Updated ${type} color to #${color.toString(16).padStart(6, "0")}`,
+    );
+    return true;
+  }
+  console.warn(`⚠️  Unknown key type: ${type}`);
+  return false;
+}
+
+/**
+ * Save current colors to localStorage
+ */
+export function saveCustomColors() {
+  try {
+    localStorage.setItem("keyColors", JSON.stringify(keyColors));
+    console.log("💾 Saved custom key colors");
+    return true;
+  } catch (error) {
+    console.error("❌ Failed to save colors:", error);
+    return false;
+  }
+}
+
+/**
+ * Reset colors to default
+ */
+export function resetColorsToDefault() {
+  keyColors = { ...defaultKeyColors };
+  try {
+    localStorage.removeItem("keyColors");
+    console.log("🔄 Reset colors to default");
+    return true;
+  } catch (error) {
+    console.warn("⚠️  Failed to clear saved colors:", error);
+    return false;
+  }
+}
+
+/**
+ * Get current key colors
+ */
+export function getKeyColors() {
+  return { ...keyColors };
+}
+
+/**
+ * Get default key colors
+ */
+export function getDefaultKeyColors() {
+  return { ...defaultKeyColors };
 }

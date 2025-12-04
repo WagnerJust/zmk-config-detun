@@ -1,5 +1,7 @@
 // Utility functions for the keyboard visualizer
 
+import { keyColors } from "./keymap-data.js";
+
 /**
  * Get the color for a key based on its label
  * @param {string} keyLabel - The label of the key
@@ -28,29 +30,29 @@ export function getKeyColor(keyLabel) {
 
   // Empty or transparent keys
   if (empty.includes(keyLabel)) {
-    return 0x424242; // Dark gray
+    return keyColors.empty;
   }
 
   // Layer switch keys
   if (layerSwitch.test(keyLabel)) {
-    return 0x00bcd4; // Cyan for layer switches
+    return keyColors.layerSwitch;
   }
 
   // Bluetooth keys
   if (bluetooth.test(keyLabel)) {
-    return 0x9c27b0; // Purple for bluetooth
+    return keyColors.special;
   }
 
   if (letters.includes(keyLabel)) {
-    return 0x4caf50; // Green for letters
+    return keyColors.letters;
   } else if (numbers.includes(keyLabel)) {
-    return 0x2196f3; // Blue for numbers
+    return keyColors.numbers;
   } else if (modifiers.includes(keyLabel)) {
-    return 0xff9800; // Orange for modifiers
+    return keyColors.modifiers;
   } else if (navigation.includes(keyLabel)) {
-    return 0xf44336; // Red for navigation
+    return keyColors.navigation;
   } else {
-    return 0x9c27b0; // Purple for special characters
+    return keyColors.special;
   }
 }
 

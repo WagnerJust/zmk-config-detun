@@ -16,12 +16,15 @@ import {
   rebuildKeyboards,
   createAllLayerKeyboards,
   animateAllLayersFloating,
+  keyObjects,
 } from "./keyboard.js";
 import {
   setupInteractions,
   toggleEditMode,
   isEditModeActive,
 } from "./interactions.js";
+import { initColorCustomization } from "./color-customization.js";
+import { getKeyColor } from "./utils.js";
 
 /**
  * Application state
@@ -119,6 +122,9 @@ async function init() {
 
     // Setup interactions
     setupInteractions(app.camera, app.renderer.domElement);
+
+    // Setup color customization with rebuild callback
+    initColorCustomization(() => rebuildAllKeyboards());
 
     // Update config source indicator
     const configSource = document.getElementById("config-source");
@@ -476,6 +482,50 @@ function setupUIControls() {
   }
 
   console.log("🎛️  UI controls initialized");
+}
+
+/**
+ * Rebuild all keyboards with updated colors
+ */
+function rebuildAllKeyboards() {
+  console.log("🔄 Rebuilding keyboards with new colors...");
+
+  if (app.multiLayerMode && app.layerKeyboards.length > 0) {
+    // Rebuild multi-layer view
+    app.layerKeyboards.forEach((layerData) => {
+      app.scene.remove(layerData.group);
+      app.scene.remove(layerData.label);
+    });
+
+    // Clear key objects
+    keyObjects.length = 0;
+
+    // Recreate layer keyboards
+    const layers = getLayers();
+    const layerGroups = createAllLayerKeyboards(layers);
+    app.layerKeyboards = layerGroups;
+
+    layerGroups.forEach((layerData) => {
+      app.scene.add(layerData.group);
+      app.scene.add(layerData.label);
+    });
+
+    console.log("✅ Multi-layer keyboards rebuilt");
+  } else if (app.leftKeyboard && app.rightKeyboard) {
+    // Rebuild single layer view
+    const currentKeymap = getKeymap();
+    const newKeyboards = rebuildKeyboards(
+      app.scene,
+      app.leftKeyboard,
+      app.rightKeyboard,
+      currentKeymap,
+    );
+
+    app.leftKeyboard = newKeyboards.leftKeyboard;
+    app.rightKeyboard = newKeyboards.rightKeyboard;
+
+    console.log("✅ Single layer keyboards rebuilt");
+  }
 }
 
 /**

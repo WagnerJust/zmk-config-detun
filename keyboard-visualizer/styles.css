@@ -134,6 +134,42 @@ body {
     max-width: 200px;
 }
 
+.legend-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.legend-header strong {
+    font-size: 14px;
+    color: white;
+}
+
+.btn-customize {
+    padding: 4px 10px;
+    background: rgba(76, 175, 80, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+    white-space: nowrap;
+}
+
+.btn-customize:hover {
+    background: rgba(76, 175, 80, 0.9);
+    transform: translateY(-1px);
+}
+
+.btn-customize:active {
+    transform: translateY(0);
+}
+
 .legend-item {
     display: flex;
     align-items: center;
@@ -419,4 +455,111 @@ body {
 
 .key-modified {
     border: 2px solid #ff9800 !important;
+}
+
+#color-settings-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 25px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90vw;
+    z-index: 200;
+    backdrop-filter: blur(10px);
+    display: none;
+    border: 2px solid rgba(76, 175, 80, 0.5);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+#color-settings-panel.active {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+#color-settings-panel h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #4caf50;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+#color-settings-panel .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+#color-settings-panel .close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.color-settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.color-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.color-field label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    flex: 1;
+}
+
+.color-field input[type="color"] {
+    width: 60px;
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.color-field input[type="color"]:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.color-field input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+.color-field input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 3px;
+}
+
+.color-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+
+.color-actions .btn {
+    margin-right: 0;
 }

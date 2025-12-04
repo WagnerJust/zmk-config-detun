@@ -60,25 +60,59 @@
             </div>
 
             <div class="legend">
+                <div class="legend-header">
+                    <strong>Key Colors</strong>
+                    <button id="color-settings-toggle" class="btn-customize">
+                        Customize
+                    </button>
+                </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #4caf50"></div>
+                    <div
+                        class="legend-color"
+                        id="legend-letters"
+                        style="background: #4caf50"
+                    ></div>
                     <span>Letters</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #2196f3"></div>
+                    <div
+                        class="legend-color"
+                        id="legend-numbers"
+                        style="background: #2196f3"
+                    ></div>
                     <span>Numbers</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #ff9800"></div>
+                    <div
+                        class="legend-color"
+                        id="legend-modifiers"
+                        style="background: #ff9800"
+                    ></div>
                     <span>Modifiers (Click me!)</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #9c27b0"></div>
+                    <div
+                        class="legend-color"
+                        id="legend-special"
+                        style="background: #9c27b0"
+                    ></div>
                     <span>Special</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #f44336"></div>
+                    <div
+                        class="legend-color"
+                        id="legend-navigation"
+                        style="background: #f44336"
+                    ></div>
                     <span>Navigation</span>
+                </div>
+                <div class="legend-item">
+                    <div
+                        class="legend-color"
+                        id="legend-layerSwitch"
+                        style="background: #00bcd4"
+                    ></div>
+                    <span>Layer Switch</span>
                 </div>
             </div>
 
@@ -151,6 +185,78 @@
                         <button id="cancel-edit" class="btn btn-secondary">
                             Cancel
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="color-settings-panel">
+                    <button class="close-btn">×</button>
+                    <h2>Customize Key Colors</h2>
+                    <div class="color-settings-content">
+                        <div class="color-field">
+                            <label for="color-letters">Letters</label>
+                            <input
+                                type="color"
+                                id="color-letters"
+                                value="#4caf50"
+                            />
+                        </div>
+                        <div class="color-field">
+                            <label for="color-numbers">Numbers</label>
+                            <input
+                                type="color"
+                                id="color-numbers"
+                                value="#2196f3"
+                            />
+                        </div>
+                        <div class="color-field">
+                            <label for="color-modifiers">Modifiers</label>
+                            <input
+                                type="color"
+                                id="color-modifiers"
+                                value="#ff9800"
+                            />
+                        </div>
+                        <div class="color-field">
+                            <label for="color-navigation">Navigation</label>
+                            <input
+                                type="color"
+                                id="color-navigation"
+                                value="#f44336"
+                            />
+                        </div>
+                        <div class="color-field">
+                            <label for="color-special">Special</label>
+                            <input
+                                type="color"
+                                id="color-special"
+                                value="#9c27b0"
+                            />
+                        </div>
+                        <div class="color-field">
+                            <label for="color-layerSwitch">Layer Switch</label>
+                            <input
+                                type="color"
+                                id="color-layerSwitch"
+                                value="#00bcd4"
+                            />
+                        </div>
+                        <div class="color-field">
+                            <label for="color-empty">Empty Keys</label>
+                            <input
+                                type="color"
+                                id="color-empty"
+                                value="#424242"
+                            />
+                        </div>
+                        <div class="color-actions">
+                            <button id="apply-colors" class="btn">
+                                Apply Colors
+                            </button>
+                            <button id="reset-colors" class="btn btn-secondary">
+                                Reset to Default
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
