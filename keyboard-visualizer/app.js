@@ -8,6 +8,7 @@ import {
   switchLayer,
   exportKeymap,
 } from "./keymap-data.js";
+import { downloadZMKConfig } from "./zmk-exporter.js";
 import { initScene } from "./scene.js";
 import {
   createKeyboards,
@@ -379,15 +380,19 @@ function handleEditModeToggle() {
   const exportBtn = document.getElementById("export-keymap");
   const interactiveHelp = document.getElementById("interactive-help");
 
+  const exportZmkBtn = document.getElementById("export-zmk-config");
+
   if (isActive) {
     toggleBtn.textContent = "Edit Mode: ON";
     toggleBtn.classList.add("active");
     exportBtn.style.display = "inline-block";
+    exportZmkBtn.style.display = "inline-block";
     interactiveHelp.textContent = "✏️ Click any key to edit its label!";
   } else {
     toggleBtn.textContent = "Edit Mode: OFF";
     toggleBtn.classList.remove("active");
     exportBtn.style.display = "none";
+    exportZmkBtn.style.display = "none";
     interactiveHelp.textContent = "🖱️ Click modifier keys to see combinations!";
   }
 }
@@ -412,6 +417,35 @@ function handleExportKeymap() {
 }
 
 /**
+ * Handle ZMK config export
+ */
+async function handleExportZMKConfig() {
+  console.log("📦 Exporting complete ZMK configuration...");
+  const exportBtn = document.getElementById("export-zmk-config");
+  const originalText = exportBtn.textContent;
+
+  try {
+    exportBtn.textContent = "Generating...";
+    exportBtn.disabled = true;
+
+    await downloadZMKConfig();
+
+    exportBtn.textContent = "✅ Downloaded!";
+    setTimeout(() => {
+      exportBtn.textContent = originalText;
+      exportBtn.disabled = false;
+    }, 2000);
+  } catch (error) {
+    console.error("Export failed:", error);
+    exportBtn.textContent = "❌ Failed";
+    setTimeout(() => {
+      exportBtn.textContent = originalText;
+      exportBtn.disabled = false;
+    }, 2000);
+  }
+}
+
+/**
  * Setup UI control event listeners
  */
 function setupUIControls() {
@@ -429,10 +463,16 @@ function setupUIControls() {
     editModeToggle.addEventListener("click", handleEditModeToggle);
   }
 
-  // Export button
+  // Export keymap button
   const exportBtn = document.getElementById("export-keymap");
   if (exportBtn) {
     exportBtn.addEventListener("click", handleExportKeymap);
+  }
+
+  // Export ZMK config button
+  const exportZmkBtn = document.getElementById("export-zmk-config");
+  if (exportZmkBtn) {
+    exportZmkBtn.addEventListener("click", handleExportZMKConfig);
   }
 
   console.log("🎛️  UI controls initialized");

@@ -1,5 +1,5 @@
 # Keyboard Visualizer - Technical Specification
-# Version: 1.0.0
+# Version: 1.1.0
 # Last Updated: December 2024
 # Project: ZMK Detun Keyboard 3D Visualizer
 
@@ -16,6 +16,7 @@
 - Real-time layer switching between single and multi-layer views
 - Auto-load from ZMK configuration files
 - Export modified keymaps as JSON
+- Export complete ZMK configuration as zip archive
 - Modifier key combinations display
 - Full 3D camera controls (rotate, pan, zoom)
 
@@ -38,6 +39,7 @@
 - FR-014: Multi-layer simultaneous view - display all 3 layers stacked vertically
 - FR-015: Dynamic switching between single-layer and multi-layer views
 - FR-016: Layer labels showing display name for each keyboard layer
+- FR-017: Export complete ZMK configuration as zip archive with all required files
 
 ### Non-Functional Requirements
 - NFR-001: Load and render within 3 seconds
@@ -66,7 +68,9 @@
 {
   "three.js": "r128",
   "source": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
-  "orbitControls": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
+  "orbitControls": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js",
+  "jszip": "3.10.1",
+  "source": "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
 }
 ```
 
@@ -84,6 +88,8 @@
 │  │  │  │  keymap-data.js (Config Management)      │   │  │  │
 │  │  │  │    ↓                                      │   │  │  │
 │  │  │  │  zmk-parser.js (Parse ZMK Files)        │   │  │  │
+│  │  │  │    ↓                                      │   │  │  │
+│  │  │  │  zmk-exporter.js (Export ZMK Config)    │   │  │  │
 │  │  │  └──────────────────────────────────────────┘   │  │  │
 │  │  │  ┌──────────────────────────────────────────┐   │  │  │
 │  │  │  │  scene.js (Three.js Setup)               │   │  │  │
@@ -175,6 +181,38 @@
   - Bluetooth: BT_CLR, BT_SEL, BT_NXT, BT_PRV
   - Transparent: &trans → ▽
   - None: &none → ✕
+
+#### zmk-exporter.js (ZMK Configuration Export)
+- **Purpose**: Generate and export complete ZMK configuration as zip archive
+- **Responsibilities**:
+  - Convert visualizer keymap format to ZMK keycode syntax
+  - Generate complete .keymap file with proper formatting
+  - Create ZMK bindings for all layers
+  - Generate ASCII visual comments for keymaps
+  - Package all required configuration files
+  - Fetch existing config files from server
+  - Create build.yaml, west.yml, and GitHub workflow files
+  - Generate zip archive with JSZip
+  - Trigger download of complete ZMK config
+- **Exports**:
+  - `exportZMKConfig()`: async → Blob (zip file)
+  - `downloadZMKConfig()`: async → boolean
+- **Imports**: keymap-data.js
+- **Generated Files**:
+  - `config/boards/shields/detun/detun.keymap` - Main keymap (modified)
+  - `build.yaml` - Build configuration
+  - `config/west.yml` - West manifest
+  - `.github/workflows/build.yml` - GitHub Actions workflow
+  - `README.md` - Export documentation
+  - Additional shield configuration files (fetched from server)
+- **Keycode Mapping**:
+  - Visualizer labels → ZMK keycodes (&kp, &mo, &lt, &to)
+  - Empty keys (✕) → &none
+  - Transparent keys (▽) → &trans
+  - Modifiers (CTRL, SHFT, etc.) → &kp LCTRL, &kp LSHFT
+  - Layer switches (L1, L2) → &mo 1, &mo 2
+  - Bluetooth commands → &bt BT_CLR, &bt BT_SEL
+  - Punctuation → proper ZMK symbol names
 
 #### scene.js (Three.js Scene Setup)
 - **Purpose**: Initialize and configure Three.js environment
