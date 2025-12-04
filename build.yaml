@@ -20,6 +20,8 @@
 ---
 include:
   - board: nice_nano_v2
-    shield: corne_left
+    shield: detun_left
   - board: nice_nano_v2
-    shield: corne_right
+    shield: detun_right
+  - board: nice_nano_v2
+    shield: detun_settings_reset
