@@ -24,4 +24,4 @@ include:
   - board: nice_nano_v2
     shield: detun_right
   - board: nice_nano_v2
-    shield: detun_settings_reset
+    shield: settings_reset
