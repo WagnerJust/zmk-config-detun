@@ -1,0 +1,5 @@
+config SHIELD_DETUN_LEFT
+    def_bool $(shields_list_contains,detun_left)
+
+config SHIELD_DETUN_RIGHT
+    def_bool $(shields_list_contains,detun_right)
