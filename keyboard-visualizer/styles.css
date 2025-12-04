@@ -1,0 +1,191 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+}
+
+#container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+#info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 300px;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+#info h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+#info p {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.legend {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px;
+    border-radius: 10px;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+    font-size: 12px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#canvas {
+    display: block;
+}
+
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+    text-align: center;
+}
+
+#combinations-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 350px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    display: none;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#combinations-panel.active {
+    display: block;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+#combinations-panel h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #FF9800;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+#combinations-panel .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+#combinations-panel .close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.combination-item {
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+    border-left: 3px solid #4CAF50;
+}
+
+.combination-keys {
+    font-weight: bold;
+    color: #4CAF50;
+    margin-bottom: 5px;
+    font-family: 'Courier New', monospace;
+}
+
+.combination-description {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+#combinations-list:empty::before {
+    content: "Click on a modifier key (Ctrl, Shift, Alt, GUI) to see available combinations";
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+/* Scrollbar styling */
+#combinations-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+#combinations-panel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+#combinations-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+#combinations-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}

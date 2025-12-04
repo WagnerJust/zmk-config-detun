@@ -1,0 +1,224 @@
+// Keyboard builder module - Creates 3D keyboard representations
+
+import { getKeyColor, createTextTexture } from "./utils.js";
+
+/**
+ * Keyboard configuration constants
+ */
+export const KEYBOARD_CONFIG = {
+  keyWidth: 2,
+  keyHeight: 0.5,
+  keyDepth: 2,
+  spacing: 0.3,
+  leftOffset: -12,
+  rightOffset: 6,
+  tiltAngle: 0.05,
+};
+
+/**
+ * Storage for all key objects for interaction
+ */
+export const keyObjects = [];
+
+/**
+ * Create a single key with label
+ * @param {string} keyLabel - The label for the key
+ * @param {number} x - X position
+ * @param {number} y - Y position
+ * @param {number} z - Z position
+ * @param {number} tilt - Rotation tilt
+ * @returns {Object} - Object containing key mesh and sprite
+ */
+export function createKey(keyLabel, x, y, z, tilt) {
+  const { keyWidth, keyHeight, keyDepth } = KEYBOARD_CONFIG;
+
+  // Create key geometry and material
+  const geometry = new THREE.BoxGeometry(keyWidth, keyHeight, keyDepth);
+  const material = new THREE.MeshStandardMaterial({
+    color: getKeyColor(keyLabel),
+    roughness: 0.4,
+    metalness: 0.6,
+    emissive: 0x000000,
+    emissiveIntensity: 0,
+  });
+
+  const key = new THREE.Mesh(geometry, material);
+  key.position.set(x, y, z);
+  key.castShadow = true;
+  key.receiveShadow = true;
+  key.rotation.y = tilt;
+
+  // Store metadata on the key object
+  key.userData = {
+    label: keyLabel,
+    originalColor: getKeyColor(keyLabel),
+    originalScale: { x: 1, y: 1, z: 1 },
+    isKey: true,
+  };
+
+  // Create text label sprite
+  const texture = createTextTexture(keyLabel);
+  const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+  const sprite = new THREE.Sprite(spriteMaterial);
+  sprite.position.set(x, y + keyHeight / 2 + 0.3, z);
+  sprite.scale.set(1.5, 1.5, 1);
+  sprite.userData = {
+    label: keyLabel,
+    isSprite: true,
+    parentKey: key,
+  };
+
+  return { key, sprite };
+}
+
+/**
+ * Create a full keyboard (left or right side)
+ * @param {Array} keymap - 2D array of key labels
+ * @param {number} offsetX - X offset for positioning
+ * @param {string} side - 'left' or 'right'
+ * @returns {THREE.Group} - Group containing all keys
+ */
+export function createKeyboard(keymap, offsetX, side = "left") {
+  const group = new THREE.Group();
+  const { keyWidth, keyHeight, keyDepth, spacing, tiltAngle } = KEYBOARD_CONFIG;
+  const tilt = side === "left" ? tiltAngle : -tiltAngle;
+
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 6; col++) {
+      const keyIndex = side === "left" ? col : col + 6;
+      const keyLabel = keymap[row][keyIndex];
+
+      // Calculate position
+      const x = col * (keyWidth + spacing);
+      const y = 0;
+      const z = row * (keyDepth + spacing);
+
+      // Create key and sprite
+      const { key, sprite } = createKey(keyLabel, x, y, z, tilt);
+
+      // Store reference for interactions
+      keyObjects.push({
+        mesh: key,
+        sprite: sprite,
+        label: keyLabel,
+        side: side,
+        row: row,
+        col: col,
+        group: group,
+      });
+
+      group.add(key);
+      group.add(sprite);
+    }
+  }
+
+  group.position.x = offsetX;
+  group.userData = {
+    side: side,
+    isKeyboard: true,
+  };
+
+  return group;
+}
+
+/**
+ * Create both left and right keyboards
+ * @param {Array} keymap - 2D array of key labels
+ * @returns {Object} - Object containing left and right keyboard groups
+ */
+export function createKeyboards(keymap) {
+  const leftKeyboard = createKeyboard(
+    keymap,
+    KEYBOARD_CONFIG.leftOffset,
+    "left",
+  );
+  const rightKeyboard = createKeyboard(
+    keymap,
+    KEYBOARD_CONFIG.rightOffset,
+    "right",
+  );
+
+  return { leftKeyboard, rightKeyboard };
+}
+
+/**
+ * Find key object by label
+ * @param {string} label - Key label to search for
+ * @returns {Object|null} - Key object or null if not found
+ */
+export function findKeyByLabel(label) {
+  return keyObjects.find((obj) => obj.label === label) || null;
+}
+
+/**
+ * Get all keys matching a pattern
+ * @param {Function} predicate - Function to test each key
+ * @returns {Array} - Array of matching key objects
+ */
+export function filterKeys(predicate) {
+  return keyObjects.filter(predicate);
+}
+
+/**
+ * Reset all keys to default state
+ */
+export function resetAllKeys() {
+  keyObjects.forEach((obj) => {
+    const material = obj.mesh.material;
+    material.color.setHex(obj.mesh.userData.originalColor);
+    material.emissive.setHex(0x000000);
+    material.emissiveIntensity = 0;
+    material.opacity = 1;
+    material.transparent = false;
+
+    // Reset scale
+    obj.mesh.scale.set(1, 1, 1);
+  });
+}
+
+/**
+ * Highlight a specific key
+ * @param {Object} keyObj - Key object to highlight
+ * @param {number} color - Hex color for highlight
+ * @param {number} intensity - Emissive intensity (0-1)
+ */
+export function highlightKey(keyObj, color = 0xffffff, intensity = 0.5) {
+  const material = keyObj.mesh.material;
+  material.emissive.setHex(color);
+  material.emissiveIntensity = intensity;
+}
+
+/**
+ * Dim a specific key
+ * @param {Object} keyObj - Key object to dim
+ * @param {number} opacity - Opacity level (0-1)
+ */
+export function dimKey(keyObj, opacity = 0.3) {
+  const material = keyObj.mesh.material;
+  material.transparent = true;
+  material.opacity = opacity;
+}
+
+/**
+ * Select a key (make it glow and scale up)
+ * @param {Object} keyObj - Key object to select
+ */
+export function selectKey(keyObj) {
+  const material = keyObj.mesh.material;
+  material.emissive.setHex(0xffffff);
+  material.emissiveIntensity = 0.8;
+
+  // Scale up slightly
+  keyObj.mesh.scale.set(1.1, 1.1, 1.1);
+}
+
+/**
+ * Animate floating effect for keyboards
+ * @param {THREE.Group} leftKeyboard - Left keyboard group
+ * @param {THREE.Group} rightKeyboard - Right keyboard group
+ * @param {number} time - Current time in seconds
+ */
+export function animateFloating(leftKeyboard, rightKeyboard, time) {
+  leftKeyboard.position.y = Math.sin(time * 0.5) * 0.1;
+  rightKeyboard.position.y = Math.sin(time * 0.5 + Math.PI) * 0.1;
+}
