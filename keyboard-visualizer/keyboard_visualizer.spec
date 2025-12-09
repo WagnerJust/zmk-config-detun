@@ -1,6 +1,6 @@
 # Keyboard Visualizer - Technical Specification
-# Version: 1.5.0
-# Last Updated: December 2024
+# Version: 1.4.0
+# Last Updated: December 2025
 # Project: ZMK Detun Keyboard 3D Visualizer
 
 ## Project Overview
@@ -11,11 +11,7 @@
 **License**: MIT
 
 **Key Features**:
-- Minimalist bright workspace aesthetic inspired by modern office setups
-- Clean white desk with realistic accessories (laptop, plant, coffee mug, pen holder, notebook, mouse)
-- Large bright window with natural daylight streaming in
-- Bright, airy environment with clean white/light gray color palette
-- Multi-layer simultaneous view (all 3 layers stacked vertically on desk)
+- Multi-layer simultaneous view (all 3 layers stacked vertically)
 - Interactive key editing with visual modification tracking (works in all views)
 - Per-layer key editing - edit keys in any layer independently
 - Real-time layer switching between single and multi-layer views
@@ -24,8 +20,7 @@
 - Export complete ZMK configuration as zip archive
 - Modifier key combinations display
 - Full 3D camera controls (rotate, pan, zoom)
-- Customizable key colors with persistent storage
-- Clean, minimal keycap colors for professional appearance
+- Type-based color customization with settings panel and persistent storage
 
 ## Core Requirements
 
@@ -47,15 +42,10 @@
 - FR-015: Dynamic switching between single-layer and multi-layer views
 - FR-016: Layer labels showing display name for each keyboard layer
 - FR-017: Export complete ZMK configuration as zip archive with all required files
-- FR-018: Customizable key colors by type with real-time preview
+- FR-018: Type-based color customization through settings panel interface
 - FR-019: Persistent color preferences stored in browser localStorage
-- FR-020: Reset colors to default functionality
+- FR-020: Reset colors to default functionality with Apply/Reset buttons
 - FR-021: Per-layer key editing - edit keys in any layer while in multi-layer view
-- FR-022: Minimalist bright workspace environment with clean aesthetic
-- FR-023: Bright natural daylight simulation from large window
-- FR-024: Clean white desk with realistic desk accessories
-- FR-025: Minimal color palette with light gray/white keycaps
-- FR-026: Professional office setup with laptop, plants, and desk items
 
 ### Non-Functional Requirements
 - NFR-001: Load and render within 3 seconds
@@ -167,16 +157,16 @@
   - `getLayers()`: → Object
   - `getCurrentLayerName()`: → string
   - `switchLayer(name)`: → boolean
-  - `updateKeyLabel(row, col, newLabel)`: → boolean
-  - `isKeyModified(row, col)`: → boolean
+  - `updateKeyLabel(row, col, newLabel)`: → boolean (updates current layer only)
+  - `isKeyModified(row, col)`: → boolean (checks current layer only)
   - `getModifications()`: → Object
   - `exportKeymap()`: → Object
   - `resetModifications()`: → void
-  - `updateKeyColor(type, color)`: → boolean
-  - `saveCustomColors()`: → boolean
-  - `resetColorsToDefault()`: → boolean
-  - `getKeyColors()`: → Object
-  - `getDefaultKeyColors()`: → Object
+  - `updateKeyColor(type, color)`: → boolean (updates keyColors for given type)
+  - `saveCustomColors()`: → boolean (saves current keyColors to localStorage)
+  - `resetColorsToDefault()`: → boolean (resets keyColors to defaultKeyColors)
+  - `getKeyColors()`: → Object (returns current keyColors)
+  - `getDefaultKeyColors()`: → Object (returns defaultKeyColors)
   - `defaultKeymap`: Array<Array<string>>
   - `defaultKeyColors`: Object
   - `keyColors`: Object (mutable, customizable)
@@ -184,10 +174,12 @@
   - `keyCombinations`: Object
 - **Imports**: zmk-parser.js
 - **Color Management**:
-  - Default colors defined in `defaultKeyColors`
-  - Current colors in `keyColors` (can be customized)
+  - Default colors defined in `defaultKeyColors` object (immutable)
+  - Current colors in `keyColors` object (mutable, starts as copy of defaults)
   - Colors auto-loaded from localStorage on module initialization
   - Supports real-time color updates with keyboard rebuild
+  - Type-based color assignment based on key label classification
+  - No per-key color storage - all keys colored by type
 
 #### zmk-parser.js (ZMK File Parser)
 - **Purpose**: Parse ZMK .keymap files and convert to visualizer format
@@ -260,7 +252,7 @@
   - `createCamera()`: → THREE.PerspectiveCamera
   - `createRenderer(container)`: → THREE.WebGLRenderer
   - `createControls(camera, domElement)`: → THREE.OrbitControls
-  - `setupLights(scene)`: → {ambientLight, directionalLight, pointLight}
+  - `setupLights(scene)`: → {ambientLight, windowLight, fillLight, hemiLight}
   - `createGround()`: → THREE.Mesh
   - `handleResize(camera, renderer)`: → void
   - `initScene(container)`: → Object (all components)
@@ -289,8 +281,8 @@
 - **Exports**:
   - `KEYBOARD_CONFIG`: Object (dimensions, offsets, layerSpacing)
   - `keyObjects`: Array<Object> (all key references)
-  - `createKey(label, x, y, z, tilt)`: → {key, sprite}
-  - `createKeyboard(keymap, offsetX, side)`: → THREE.Group
+  - `createKey(label, x, y, z, tilt)`: → {key, sprite} (layerName parameter removed)
+  - `createKeyboard(keymap, offsetX, side)`: → THREE.Group (layerName parameter removed)
   - `createKeyboards(keymap)`: → {leftKeyboard, rightKeyboard}
   - `createAllLayerKeyboards(layers)`: → Array<Object> (all layer groups)
   - `createLayerLabel(layerName, y)`: → THREE.Sprite
@@ -312,7 +304,8 @@
     side: 'left' | 'right',
     row: number (0-4),
     col: number (0-5),
-    group: THREE.Group
+    group: THREE.Group,
+    // Note: layerName removed - no longer stored in key objects
   }
   ```
 - **Keyboard Configuration**:
@@ -338,6 +331,8 @@
   - Manage modifier key selection
   - Update combinations panel UI
   - Highlight/dim keys based on combinations
+  - Manage edit mode (only available in single-layer view)
+  - Prevent edit mode activation in multi-layer view
 - **Exports**:
   - `interactionState`: Object (state tracking)
   - `setupInteractions(camera, renderer)`: → void
@@ -350,6 +345,12 @@
   3. Highlight available keys
   4. Dim unavailable keys
   5. Display panel with descriptions
+- **Edit Mode Flow** (single-layer view only):
+  1. User toggles edit mode
+  2. Click key → Open edit panel
+  3. Edit panel shows position (no layer name)
+  4. User edits label → Updates current layer only
+  5. Key marked as modified with visual indicator
 
 #### utils.js (Utility Functions)
 - **Purpose**: Reusable helper functions
@@ -373,51 +374,61 @@
   - `lerp(start, end, t)`: → number
   - `easeOutCubic(t)`: → number
 - **Imports**: keymap-data.js
+- **Key Classification Logic**:
+  - Letters: A-Z (cream)
+  - Numbers: 0-9 (cream)
+  - Modifiers: CTRL, GUI, ALT, SHFT, TAB, CAPS, ESC (blue)
+  - Navigation: BSPC, ENT, SPC, arrows, HOME, END, PGUP, PGDN (blue)
+  - Layer switches: L0-9, LT0-9, TO0-9 pattern match (pink)
+  - Bluetooth: BT prefix pattern match (light gray)
+  - Empty: ✕, ▽, NONE, TRANS, &trans, &none (dark gray)
+  - Special: Everything else (light gray)
 
 #### color-customization.js (Color Customization Handler)
-- **Purpose**: Handle color customization UI and persistence
+- **Purpose**: Handle type-based color customization UI and persistence
 - **Responsibilities**:
-  - Initialize color picker UI
-  - Handle color input changes
-  - Apply custom colors to keyboard
+  - Initialize color settings panel UI
+  - Handle color input changes for each key type
+  - Apply custom colors to keyboard by type
   - Save color preferences to localStorage
-  - Load saved color preferences
+  - Load saved color preferences on init
   - Reset colors to defaults
-  - Real-time preview of color changes
-  - Update legend colors
+  - Update legend colors in real-time
   - Trigger keyboard rebuild on color change
 - **Exports**:
   - `initColorCustomization(rebuildCallback)`: → void
   - `hexToNumber(hexColor)`: → number
   - `numberToHex(colorNumber)`: → string
-- **Imports**: keymap-data.js, utils.js
+- **Imports**: keymap-data.js
 - **UI Elements**:
-  - Color picker inputs for each key type
+  - Settings panel with color input fields for each key type
   - Apply button to save and apply changes
   - Reset button to restore defaults
-  - Real-time legend preview
-  - Modal panel with close button
+  - Close button (X) to dismiss panel
+  - Legend items showing current colors
+  - ESC key to close panel
 - **Color Types Supported**:
   - letters: Letter keys (A-Z)
   - numbers: Number keys (0-9)
-  - modifiers: Modifier keys (Ctrl, Shift, Alt, etc.)
-  - navigation: Navigation keys (arrows, space, enter, etc.)
+  - modifiers: Modifier keys (Ctrl, Shift, Alt, Tab, Caps, Esc)
+  - navigation: Navigation keys (arrows, space, enter, backspace, etc.)
   - special: Special characters and symbols
   - layerSwitch: Layer switching keys (L1, L2, etc.)
   - empty: Empty/transparent keys (✕, ▽)
 - **Storage**:
   - localStorage key: "keyColors"
-  - Format: JSON object with color values as hex numbers
+  - Format: JSON object with type names as keys, hex color numbers as values
   - Auto-load on application start
   - Persist across sessions
 - **Interaction Flow**:
-  1. User clicks "Customize" button
-  2. Color picker panel opens
-  3. User adjusts colors (real-time legend preview)
+  1. User clicks "Customize Colors" button in legend panel
+  2. Settings panel opens with current colors loaded
+  3. User adjusts colors using HTML color inputs
   4. User clicks "Apply Colors"
-  5. Colors saved to localStorage
+  5. Colors saved to localStorage and applied to keyColors
   6. Keyboard rebuilds with new colors
-  7. Panel closes or user continues editing
+  7. Legend updates to reflect new colors
+  8. Panel stays open for further edits or user closes it
 
 #### styles.css (Visual Styling)
 - **Purpose**: All visual styling and UI elements
@@ -508,18 +519,20 @@ Array<Array<string>> [
 
 ## Color Scheme
 
-### Key Colors (Hex)
+### Default Key Colors (Hex)
 ```javascript
 {
-  letters: 0x4CAF50,        // Green
-  numbers: 0x2196F3,        // Blue
-  modifiers: 0xFF9800,      // Orange
-  navigation: 0xF44336,     // Red
-  special: 0x9C27B0,        // Purple
-  layerSwitch: 0x00BCD4,    // Cyan
-  empty: 0x424242           // Dark Gray
+  letters: 0xf5e6d3,        // Cream colored (like nice PBT keycaps)
+  numbers: 0xf5e6d3,        // Cream colored
+  modifiers: 0x64b5f6,      // Blue for actions/modifiers
+  navigation: 0x64b5f6,     // Blue for navigation
+  special: 0xe0e0e0,        // Light gray for special chars
+  layerSwitch: 0xf48fb1,    // Pink for layer switching
+  empty: 0x6e6e6e           // Dark gray for empty keys
 }
 ```
+
+**Note**: These are the default colors. Users can customize each type through the settings panel. Custom colors are stored in localStorage and persist across sessions.
 
 ### Scene Colors
 ```javascript
@@ -557,7 +570,7 @@ Array<Array<string>> [
 - Layer labels shown in front of each keyboard
 - Floating animation synchronized with phase offset
 - Camera positioned at (0, 20, 45) to view entire stack
-- Edit mode and interactions disabled in this view
+- Edit mode disabled - must switch to single-layer view to edit keys
 - Default selection: "All Layers (Stacked)"
 
 **Layer Positions:**
@@ -589,9 +602,18 @@ Array<Array<string>> [
 
 ### Single-Layer View
 - **View Mode**: Click modifiers to see combinations
-- **Edit Mode**: Click any key to edit label
+- **Edit Mode**: Toggle on to click any key and edit its label (only available in single-layer view)
 - **Layer Switching**: Switch between individual layers
 - **Export**: Save modifications as JSON
+
+### Color Customization
+- **Settings Panel**: Click "Customize Colors" button to open color settings panel
+- **Type-Based Coloring**: Customize colors for 7 key types (letters, numbers, modifiers, navigation, special, layerSwitch, empty)
+- **Real-Time Preview**: Legend updates as colors are changed
+- **Apply Changes**: Click "Apply Colors" to save and apply custom colors
+- **Reset**: Click "Reset Colors" to restore default color scheme
+- **Persistence**: Custom colors saved to localStorage and restored on reload
+- **Close Panel**: Click X button or press ESC key to close settings panel
 
 ### Configuration Files
 ```
@@ -771,8 +793,8 @@ handleMouseMove(
   aspect: window.innerWidth / window.innerHeight,
   near: 0.1,
   far: 1000,
-  position: {x: 0, y: 15, z: 25},
-  lookAt: {x: 0, y: 0, z: 0}
+  position: {x: 0, y: 20, z: 45},
+  lookAt: {x: 0, y: 15, z: 0}
 }
 ```
 
@@ -781,8 +803,8 @@ handleMouseMove(
 {
   enableDamping: true,
   dampingFactor: 0.05,
-  minDistance: 10,
-  maxDistance: 50,
+  minDistance: 15,
+  maxDistance: 80,
   enablePan: true,
   enableRotate: true,
   enableZoom: true
@@ -794,19 +816,31 @@ handleMouseMove(
 {
   ambient: {
     color: 0xFFFFFF,
-    intensity: 0.6
+    intensity: 0.5
   },
-  directional: {
+  windowLight: {
     color: 0xFFFFFF,
-    intensity: 0.8,
-    position: {x: 10, y: 20, z: 10},
+    intensity: 0.7,
+    position: {x: 0, y: 30, z: -40},
     castShadow: true,
-    shadowMapSize: 2048
+    shadowMapSize: 2048,
+    shadowCamera: {
+      left: -50,
+      right: 50,
+      top: 50,
+      bottom: -20
+    },
+    shadowBias: -0.0001
   },
-  point: {
-    color: 0x667EEA,
-    intensity: 0.5,
-    position: {x: -10, y: 10, z: 10}
+  fillLight: {
+    color: 0xFFFFFF,
+    intensity: 0.4,
+    position: {x: -20, y: 20, z: 10}
+  },
+  hemisphere: {
+    skyColor: 0xFFFFFF,
+    groundColor: 0xE8E8E8,
+    intensity: 0.3
   }
 }
 ```
@@ -976,7 +1010,7 @@ php -S localhost:8000         # PHP built-in
 
 ### Version Management
 - Follows Semantic Versioning (SemVer)
-- Current version: 1.0.0
+- Current version: 1.4.0
 - Version tracking in this spec file
 
 ### Update Checklist
@@ -1018,7 +1052,66 @@ php -S localhost:8000         # PHP built-in
 
 ## Changelog
 
-### Version 1.0.0 (December 2024)
+### Version 1.4.0 (December 2025)
+- **MAJOR**: Changed color system from per-key customization to type-based customization
+- Removed per-key paint mode with multi-selection functionality
+- Removed centered color picker overlay with 8 preset color swatches
+- Added settings panel interface for color customization
+- Changed color storage from position-based (layer:row:col) to type-based (letters, numbers, modifiers, etc.)
+- Updated default color scheme to cream keycaps with blue modifiers/navigation and pink layer switches
+- Modified `keymap-data.js` exports:
+  - `defaultKeyColor` (single value) → `defaultKeyColors` (object with types)
+  - Added `getKeyColors()` and `getDefaultKeyColors()` functions
+  - Color management now type-based instead of position-based
+- Modified `utils.js` `getKeyColor()` function:
+  - Now takes only label parameter (removed layerName, row, col parameters)
+  - Implements key classification logic based on label content
+  - Returns color based on key type (letters, numbers, modifiers, navigation, special, layerSwitch, empty)
+- Rewrote `color-customization.js`:
+  - Removed multi-key selection and paint mode logic
+  - Changed from popup color picker to settings panel approach
+  - Added Apply/Reset buttons in settings panel
+  - Real-time legend color preview maintained
+  - Settings panel opens with "Customize Colors" button
+- Updated lighting configuration:
+  - Fill light intensity increased from 0.25 to 0.4
+  - Hemisphere light intensity increased from 0.2 to 0.3
+  - Overall brighter lighting for better color visibility
+- Removed documentation files:
+  - COLOR_CUSTOMIZATION.md (per-key color documentation)
+  - COLOR_PALETTE.md (palette documentation)
+- Updated UI styling:
+  - Removed color picker overlay styles
+  - Added color settings panel styles with color input fields
+  - Legend items now display current colors dynamically
+  - ESC key support to close settings panel
+
+### Version 1.3.0 (December 2025)
+- **REVERSION**: Reverted from bright workspace aesthetic back to original dark theme
+- Removed minimalist bright workspace environment features
+- Removed clean white desk with realistic accessories (laptop, plant, coffee mug, etc.)
+- Removed large bright window with natural daylight simulation
+- Reverted to dark blue-gray background (0x1A1A2E) from bright theme
+- Reverted key colors to vibrant scheme (green letters, blue numbers, orange modifiers, red navigation, purple special, cyan layer switch)
+- Removed desk, walls, window, desk mat, and decorative items from scene
+- Simplified lighting from multi-source natural lighting to 3-light setup (ambient, directional, point)
+- Reverted UI theme from light panels to dark panels with colored accents
+- Changed camera FOV back to 75° (from 40°)
+- Adjusted camera position to (0, 20, 45) for better multi-layer viewing
+- Increased controls max distance to 80 (from 60) for full layer stack visibility
+- Simplified modifier highlighting (removed layer-aware highlighting)
+- Reverted text texture to white text with bold Arial font
+- Simplified empty key detection
+
+### Version 1.2.0 (December 2025)
+- Added bright workspace aesthetic with modern office setup
+- Clean white desk with realistic accessories
+- Natural daylight simulation from large window
+- Muted, professional keycap colors (cream/light gray palette)
+- Multi-source lighting for realistic ambiance
+- Light UI theme with white panels
+
+### Version 1.0.0 (December 2025)
 - Initial release
 - ZMK config auto-loading
 - Interactive key combinations
@@ -1030,7 +1123,6 @@ php -S localhost:8000         # PHP built-in
 
 **Document Control**
 - Author: Development Team
-- Last Reviewed: December 2024
-- Next Review: March 2025
+- Last Reviewed: December 2025
 - Status: Active
 - Classification: Public

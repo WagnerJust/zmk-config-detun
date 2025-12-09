@@ -1,0 +1,1749 @@
+diff --git a/.rules b/.rules
+deleted file mode 100644
+index 5acecb1..0000000
+--- a/.rules
++++ /dev/null
+@@ -1,25 +0,0 @@
+-**NEVER** EDIT OR CREATE ANY MARKDOWN FILES UNLESS EXPLICITLY ASKED BY THE USER TO DO SO.
+-
+-## Source of Truth
+-- **Always** consult keyboard_visualizer/keyboard_visualizer.spec in this directory for:
+-  - Technology stack and architecture decisions
+-  - Project requirements and constraints
+-  - Implementation details and standards
+-- The spec file is the authoritative reference for all project decisions
+-- **ALWAYS** If you change anything in the app that is not in the spec file, update the spec file accordingly
+-
+-## Code Style
+-- No emoji in code, comments, or console output
+-- Minimize comments - code should be self-documenting
+-- Only add comments when explaining complex logic or non-obvious decisions
+-- Use clear, descriptive variable and function names
+-
+-## Documentation Sources
+-- **ALWAYS** Use context7 MCP server to access latest documentation for all libraries OR remote repositories. Some are listed below:
+-  -- /zmkfirmware/zmk
+-  -- Three.js
+-- Stay current with official docs rather than relying on outdated information
+-
+-## Other
+-- No build step required - pure vanilla JS
+-- Works with Python/PHP/Node HTTP serverss
+diff --git a/config/boards/shields/detun/detun.keymap b/config/boards/shields/detun/detun.keymap
+index 55ce0c6..fa6d474 100644
+--- a/config/boards/shields/detun/detun.keymap
++++ b/config/boards/shields/detun/detun.keymap
+@@ -13,33 +13,47 @@
+                 compatible = "zmk,keymap";
+ 
+                 default_layer {
+-// ---------------------------------------------------------------------------------
+-// |   `  |  1  |  2  |  3  |  4  |  5  |     |  6  |  7  |  8  |  9  |  0  | BKSP |
+-// |  TAB |  Q  |  W  |  E  |  R  |  T  |     |  Y  |  U  |  I  |  O  |  P  |  \   |
+-// | CAPS |  A  |  S  |  D  |  F  |  G  |     |  H  |  J  |  K  |  L  |  ;  |  ENT |
+-// | SHFT |  Z  |  X  |  C  |  V  |  B  |     |  N  |  M  |  ,  |  .  |  /  | APOS |
+-// | CTRL | ALT | GUI | SPC | SPC | SPC |     | SPC | LOW |LARW |DARW |UARW | RARW |
++                        display-name = "Default Layer";
++// -----------------------------------------------------------------------------------------
++// |  TAB |  Q  |  W  |  E  |  R  |  T  |   |  Y  |  U   |  I  |  O  |  P  | BSPC |
++// | CTRL |  A  |  S  |  D  |  F  |  G  |   |  H  |  J   |  K  |  L  |  ;  |  '   |
++// | SHFT |  Z  |  X  |  C  |  V  |  B  |   |  N  |  M   |  ,  |  .  |  /  | ESC  |
++//                    | GUI | LWR | SPC |   | ENT | RSE  | ALT |
+                         bindings = <
+-   &kp GRAVE  &kp N1    &kp N2    &kp N3     &kp N4     &kp N5               &kp N6     &kp N7  &kp N8     &kp N9    &kp N0    &kp BSPC
+-   &kp TAB    &kp Q     &kp W     &kp E      &kp R      &kp T                &kp Y      &kp U   &kp I      &kp O     &kp P     &kp BSLH
+-   &kp CAPS   &kp A     &kp S     &kp D      &kp F      &kp G                &kp H      &kp J   &kp K      &kp L     &kp SEMI  &kp RET
+-   &kp LSHFT  &kp Z     &kp X     &kp C      &kp V      &kp B                &kp N      &kp M   &kp COMMA  &kp DOT   &kp FSLH  &kp APOS
+-   &kp LCTRL  &kp LALT  &kp LGUI  &kp SPACE  &kp LALT   &kp LGUI             &kp SPACE  &mo 1   &kp LARW   &kp DARW  &kp UARW  &kp RARW
++   &kp TAB   &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U  &kp I     &kp O   &kp P    &kp BSPC
++   &kp LCTRL &kp A &kp S &kp D &kp F &kp G   &kp H &kp J  &kp K     &kp L   &kp SEMI &kp SQT
++   &kp LSHFT &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M  &kp COMMA &kp DOT &kp FSLH &kp ESC
++                  &kp LGUI &mo 1 &kp SPACE   &kp RET &mo 2 &kp RALT
+                         >;
+                 };
+                 lower_layer {
+-// ------------------------------------------------------------------------------------------------------------
+-// |       |  BT1  |  BT2  |  BT3  |  BT4  |  BT5  |          |       |       |       |       |       | BTCLR |
+-// |       |       |       |       |       |       |          |       |       |       |       |       |       |
+-// |       |       |       | LPAR  | RPAR  |       |          |       | LBKT  | RBKT  |       |       |       |
+-// |       |       |       |       |       |       |          |       |       |       |       |       |       |
++                        display-name = "Lower Layer";
++// -----------------------------------------------------------------------------------------
++// |  TAB |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  8  |  9  |  0  | BSPC |
++// | BTCLR| BT1 | BT2 | BT3 | BT4 | BT5 |   | LFT | DWN |  UP | RGT |     |      |
++// | SHFT |     |     |     |     |     |   |     |     |     |     |     |      |
++//                    | GUI |     | SPC |   | ENT |     | ALT |
+                         bindings = <
+-   &trans    &bt BT_SEL 0   &bt BT_SEL 1   &bt BT_SEL 2   &bt BT_SEL 3   &bt BT_SEL 4           &trans    &trans    &trans     &trans     &trans     &bt BT_CLR
+-   &trans    &trans         &trans         &trans         &trans         &trans                 &trans    &trans    &trans     &trans     &trans     &trans
+-   &trans    &trans         &trans         &kp LPAR       &kp RPAR       &trans                 &trans    &kp LBKT  &kp RBKT   &kp MINUS  &kp EQUAL  &trans
+-   &trans    &trans         &trans         &trans         &trans         &trans                 &trans    &trans    &trans     &trans     &trans     &trans
+-   &trans    &trans         &trans         &trans         &trans         &trans                 &trans    &trans    &trans     &trans     &trans     &trans
++   &kp TAB    &kp N1       &kp N2       &kp N3       &kp N4       &kp N5         &kp N6   &kp N7   &kp N8 &kp N9    &kp N0 &kp BSPC
++   &bt BT_CLR &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4   &kp LEFT &kp DOWN &kp UP &kp RIGHT &trans &trans
++   &kp LSHFT  &trans       &trans       &trans       &trans       &trans         &trans   &trans   &trans &trans    &trans &trans
++                                    &kp LGUI     &trans       &kp SPACE      &kp RET  &trans   &kp RALT
++                        >;
++                };
++
++                raise_layer {
++                        display-name = "Raise Layer";
++// -----------------------------------------------------------------------------------------
++// |  TAB |  !  |  @  |  #  |  $  |  %  |   |  ^  |  &  |  *  |  (  |  )  | BSPC |
++// | CTRL |     |     |     |     |     |   |  -  |  =  |  [  |  ]  |  \  |  `   |
++// | SHFT |     |     |     |     |     |   |  _  |  +  |  {  |  }  | "|" |  ~   |
++//                    | GUI |     | SPC |   | ENT |     | ALT |
++                        bindings = <
++   &kp  TAB  &kp EXCL &kp AT &kp HASH &kp DLLR &kp PRCNT   &kp CARET &kp AMPS  &kp ASTRK &kp LPAR &kp RPAR &kp BSPC
++   &kp LCTRL &trans   &trans &trans   &trans   &trans      &kp MINUS &kp EQUAL &kp LBKT  &kp RBKT &kp BSLH &kp GRAVE
++   &kp LSHFT &trans   &trans &trans   &trans   &trans      &kp UNDER &kp PLUS  &kp LBRC  &kp RBRC &kp PIPE &kp TILDE
++                             &kp LGUI &trans   &kp SPACE   &kp RET   &trans    &kp RALT
+                         >;
+                 };
+         };
+-};
+\ No newline at end of file
++};
+diff --git a/keyboard-visualizer/COLOR_CUSTOMIZATION.md b/keyboard-visualizer/COLOR_CUSTOMIZATION.md
+deleted file mode 100644
+index 2285b13..0000000
+--- a/keyboard-visualizer/COLOR_CUSTOMIZATION.md
++++ /dev/null
+@@ -1,149 +0,0 @@
+-# Per-Key Color Customization
+-
+-## Overview
+-
+-The keyboard visualizer now supports **per-key color customization** instead of group-based coloring. You can paint individual keys with any color you want, and your color choices will persist across browser sessions.
+-
+-## How to Use
+-
+-### 1. Enter Paint Mode
+-
+-Click the **"Paint Keys"** button in the legend panel (bottom right) to enter color customization mode.
+-
+-### 2. Select Keys
+-
+-- **Single Selection**: Click any key to select it
+-- **Multi-Selection**: Hold `Shift` and click multiple keys to select them all at once
+-
+-### 3. Choose a Color
+-
+-When you select one or more keys, a color picker will appear in the center of the screen showing:
+-- 8 preset color options to choose from
+-- The number of currently selected keys
+-- A Reset button to restore default color
+-
+-Available colors:
+-- **Black** (#2c2c2c) - Dark charcoal
+-- **Cream** (#f5e6d3) - Default key color
+-- **Sky Blue** (#87ceeb) - Light blue
+-- **Mint** (#7dd3c0) - Aqua green
+-- **Yellow** (#f4e57e) - Soft yellow
+-- **Pink** (#f5a3b5) - Pastel pink
+-- **Lavender** (#b8a7d9) - Light purple
+-- **Purple** (#7e6db5) - Deep purple
+-
+-### 4. Apply the Color
+-
+-Click any of the 8 color swatches to immediately paint the selected keys with that color. The color is automatically saved to your browser's localStorage.
+-
+-### 5. Reset Colors
+-
+-- **Reset Selected Keys**: Click **"Reset"** in the color picker to restore selected keys to the default cream color
+-- **Reset All Keys**: Click **"Reset All"** at the bottom of the legend panel to clear all custom colors
+-
+-### 6. Exit Paint Mode
+-
+-Click **"Exit Paint Mode"** (same button as before) to return to normal interaction mode.
+-
+-## Features
+-
+-### Persistent Colors
+-
+-All color customizations are automatically saved to your browser's localStorage. When you reload the page, your custom colors will be restored.
+-
+-### Multi-Key Selection
+-
+-Select multiple keys at once by holding Shift while clicking. This makes it easy to paint groups of keys with the same color.
+-
+-### Visual Feedback
+-
+-- Selected keys are highlighted with an orange glow
+-- The color picker shows how many keys are currently selected
+-- Buttons provide visual feedback when colors are applied
+-
+-### Layer Support
+-
+-Colors are stored per-layer, so you can have different color schemes for different layers of your keyboard.
+-
+-## Technical Details
+-
+-### Data Storage
+-
+-Colors are stored in localStorage with the format:
+-```json
+-{
+-  "layer:row:col": 0xHEXCOLOR
+-}
+-```
+-
+-For example:
+-```json
+-{
+-  "default:0:0": 0xff9800,
+-  "default:0:1": 0x4caf50
+-}
+-```
+-
+-### Default Color
+-
+-Keys without custom colors use the default cream color: `#f5e6d3` (0xf5e6d3)
+-
+-### Color Storage Key
+-
+-Custom colors are stored in localStorage under the key: `keyColors`
+-
+-## Removed Features
+-
+-The previous group-based color system (letters, numbers, modifiers, etc.) has been removed in favor of this more flexible per-key system. The old legend items showing color groups are now replaced with instructions for using the paint mode.
+-
+-## Tips
+-
+-1. **Plan Your Color Scheme**: Think about which keys you want to highlight before starting
+-2. **Use Shift+Click**: Multi-select similar keys (like all number keys) to color them at once
+-3. **Experiment**: You can always reset colors if you don't like the result
+-4. **Layer-Specific Colors**: Switch to different layers and color them differently for visual distinction
+-
+-## Troubleshooting
+-
+-### Colors Not Persisting
+-
+-If your colors aren't saving between sessions:
+-1. Check that your browser allows localStorage
+-2. Make sure you're not in private/incognito mode
+-3. Verify that the console shows "💾 Saved custom key colors" when you apply colors
+-
+-### Can't Select Keys
+-
+-If clicking keys doesn't select them:
+-1. Make sure you're in Paint Mode (button should say "Exit Paint Mode")
+-2. Check that the cursor changes to a pointer when hovering over keys
+-3. Try clicking directly on the key surface, not the text label
+-
+-### Color Picker Not Showing
+-
+-If the color picker doesn't appear after selecting keys:
+-1. Select at least one key first
+-2. Check browser console for errors
+-3. Try refreshing the page
+-
+-## Available Colors
+-
+-The visualizer provides 8 carefully selected colors:
+-
+-1. **Black** - Great for special keys or accents
+-2. **Cream** - Default color for a clean look
+-3. **Sky Blue** - Cool and calming
+-4. **Mint** - Fresh and modern
+-5. **Yellow** - Bright and attention-grabbing
+-6. **Pink** - Soft and playful
+-7. **Lavender** - Gentle purple tone
+-8. **Purple** - Rich and bold
+-
+-## Future Enhancements
+-
+-Possible future additions:
+-- Copy/paste colors between keys
+-- Import/export color schemes
+-- Additional color presets
+-- Color by key function (auto-color all modifiers, etc.)
+-</text>
+diff --git a/keyboard-visualizer/COLOR_PALETTE.md b/keyboard-visualizer/COLOR_PALETTE.md
+deleted file mode 100644
+index df788ce..0000000
+--- a/keyboard-visualizer/COLOR_PALETTE.md
++++ /dev/null
+@@ -1,106 +0,0 @@
+-# Color Palette Reference
+-
+-## Available Colors
+-
+-The keyboard visualizer uses a curated palette of 8 colors for key customization.
+-
+-### Color Swatches
+-
+-```
+-🔲 Black      #2c2c2c  (44, 44, 44)
+-🔲 Cream      #f5e6d3  (245, 230, 211)
+-🔲 Sky Blue   #87ceeb  (135, 206, 235)
+-🔲 Mint       #7dd3c0  (125, 211, 192)
+-🔲 Yellow     #f4e57e  (244, 229, 126)
+-🔲 Pink       #f5a3b5  (245, 163, 181)
+-🔲 Lavender   #b8a7d9  (184, 167, 217)
+-🔲 Purple     #7e6db5  (126, 109, 181)
+-```
+-
+-### Color Details
+-
+-#### Black (#2c2c2c)
+-- **Use Case**: Special keys, accents, high contrast
+-- **RGB**: 44, 44, 44
+-- **Hex**: 0x2c2c2c
+-
+-#### Cream (#f5e6d3) - Default
+-- **Use Case**: Default key color, neutral base
+-- **RGB**: 245, 230, 211
+-- **Hex**: 0xf5e6d3
+-
+-#### Sky Blue (#87ceeb)
+-- **Use Case**: Modifiers, function keys
+-- **RGB**: 135, 206, 235
+-- **Hex**: 0x87ceeb
+-
+-#### Mint (#7dd3c0)
+-- **Use Case**: Navigation, arrows, special functions
+-- **RGB**: 125, 211, 192
+-- **Hex**: 0x7dd3c0
+-
+-#### Yellow (#f4e57e)
+-- **Use Case**: Numbers, attention keys
+-- **RGB**: 244, 229, 126
+-- **Hex**: 0xf4e57e
+-
+-#### Pink (#f5a3b5)
+-- **Use Case**: Layer switches, special modes
+-- **RGB**: 245, 163, 181
+-- **Hex**: 0xf5a3b5
+-
+-#### Lavender (#b8a7d9)
+-- **Use Case**: Letters, alphas, main keys
+-- **RGB**: 184, 167, 217
+-- **Hex**: 0xb8a7d9
+-
+-#### Purple (#7e6db5)
+-- **Use Case**: Secondary functions, symbols
+-- **RGB**: 126, 109, 181
+-- **Hex**: 0x7e6db5
+-
+-## Design Philosophy
+-
+-This palette was chosen to provide:
+-- **Sufficient contrast** for visibility
+-- **Harmonious colors** that work well together
+-- **Functional distinction** between key types
+-- **Aesthetic appeal** for a modern keyboard layout
+-
+-## Color Combinations
+-
+-Suggested combinations for different keyboard layouts:
+-
+-### Minimal
+-- All keys: Cream
+-- Modifiers: Sky Blue
+-- Special: Black
+-
+-### Pastel Theme
+-- Alphas: Cream
+-- Modifiers: Lavender
+-- Numbers: Yellow
+-- Special: Pink
+-
+-### Cool Tones
+-- Alphas: Cream
+-- Modifiers: Sky Blue
+-- Navigation: Mint
+-- Layers: Purple
+-
+-### High Contrast
+-- Alphas: Cream
+-- Modifiers: Black
+-- Numbers: Yellow
+-- Special: Pink
+-
+-## Technical Implementation
+-
+-Colors are stored as hexadecimal values in localStorage:
+-```javascript
+-{
+-  "layer:row:col": 0x87ceeb  // Example: Sky Blue
+-}
+-```
+-
+-Default color for unpainted keys: `0xf5e6d3` (Cream)
+\ No newline at end of file
+diff --git a/keyboard-visualizer/color-customization.js b/keyboard-visualizer/color-customization.js
+index 6669b30..d744e1c 100644
+--- a/keyboard-visualizer/color-customization.js
++++ b/keyboard-visualizer/color-customization.js
+@@ -1,453 +1,207 @@
+-// Per-key color customization module for keyboard visualizer
++// Color customization module for keyboard visualizer
+ 
+-console.log("🎨 Per-key color customization module loaded");
++console.log("🎨 Color customization module loaded");
+ 
+ import {
++  getKeyColors,
++  getDefaultKeyColors,
+   updateKeyColor,
+-  clearKeyColor,
+   saveCustomColors,
+   resetColorsToDefault,
+-  getDefaultKeyColor,
+ } from "./keymap-data.js";
+-import { keyObjects } from "./keyboard.js";
+-import { 
+-  getIntersectedKeyFromEvent,
+-  setColorModeChecker 
+-} from "./interactions.js";
+-
+-/**
+- * Selected keys for multi-selection
+- */
+-const selectedKeys = new Set();
+-let colorPickerElement = null;
+-let colorPickerTarget = null;
++import { getKeyColor } from "./utils.js";
+ 
+ /**
+  * Initialize color customization UI
+  */
+ export function initColorCustomization(rebuildCallback) {
+-  console.log("🎨 Initializing per-key color customization...");
+-
+-  // Create floating color picker
+-  createColorPicker();
+-
+-  // Setup color customization controls
+-  setupColorControls(rebuildCallback);
+-
+-  // Register color mode checker with interactions
+-  setColorModeChecker(isColorModeActive);
+-
+-  console.log("🎨 Per-key color customization initialized");
+-}
+-
+-/**
+- * Create floating color picker element
+- */
+-function createColorPicker() {
+-  colorPickerElement = document.createElement("div");
+-  colorPickerElement.id = "key-color-picker";
+-  colorPickerElement.className = "key-color-picker";
+-  colorPickerElement.innerHTML = `
+-    <div class="color-picker-header">
+-      <span class="color-picker-title">Key Color</span>
+-      <button class="color-picker-close">×</button>
+-    </div>
+-    <div class="color-picker-body">
+-      <div class="color-palette">
+-        <button class="color-option" data-color="#2c2c2c" style="background: #2c2c2c;" title="Black"></button>
+-        <button class="color-option" data-color="#f5e6d3" style="background: #f5e6d3;" title="Cream"></button>
+-        <button class="color-option" data-color="#87ceeb" style="background: #87ceeb;" title="Sky Blue"></button>
+-        <button class="color-option" data-color="#7dd3c0" style="background: #7dd3c0;" title="Mint"></button>
+-        <button class="color-option" data-color="#f4e57e" style="background: #f4e57e;" title="Yellow"></button>
+-        <button class="color-option" data-color="#f5a3b5" style="background: #f5a3b5;" title="Pink"></button>
+-        <button class="color-option" data-color="#b8a7d9" style="background: #b8a7d9;" title="Lavender"></button>
+-        <button class="color-option" data-color="#7e6db5" style="background: #7e6db5;" title="Purple"></button>
+-      </div>
+-      <div class="color-picker-actions">
+-        <button id="clear-key-color" class="btn btn-small btn-secondary">Reset to Default</button>
+-      </div>
+-      <div class="color-picker-info">
+-        <small>Selected keys: <span id="selected-count">0</span></small>
+-        <small>Shift+Click to select multiple</small>
+-      </div>
+-    </div>
+-  `;
+-  
+-  colorPickerElement.style.display = "none";
+-  document.body.appendChild(colorPickerElement);
++  console.log("🎨 Initializing color customization...");
+ 
+-  // Close button
+-  const closeBtn = colorPickerElement.querySelector(".color-picker-close");
+-  closeBtn.addEventListener("click", hideColorPicker);
+-
+-  // Color option buttons
+-  const colorOptions = colorPickerElement.querySelectorAll(".color-option");
+-  colorOptions.forEach(btn => {
+-    btn.addEventListener("click", () => {
+-      const color = btn.dataset.color;
+-      applyColorToSelectedKeys(color);
+-    });
+-  });
+-
+-  // Clear color button
+-  const clearBtn = document.getElementById("clear-key-color");
+-  clearBtn.addEventListener("click", clearColorFromSelectedKeys);
+-
+-  // Close on Escape
+-  document.addEventListener("keydown", (e) => {
+-    if (e.key === "Escape" && colorPickerElement.style.display !== "none") {
+-      hideColorPicker();
+-    }
+-  });
+-}
+-
+-/**
+- * Setup color customization controls
+- */
+-function setupColorControls(rebuildCallback) {
+   const colorSettingsToggle = document.getElementById("color-settings-toggle");
+-  
++  const colorSettingsPanel = document.getElementById("color-settings-panel");
++
+   if (!colorSettingsToggle) {
+     console.error("❌ Color settings toggle button not found!");
+     return;
+   }
+ 
+-  // Change the button text to reflect new functionality
+-  colorSettingsToggle.textContent = "Paint Keys";
+-
+-  // Toggle color mode
+-  colorSettingsToggle.addEventListener("click", () => {
+-    toggleColorMode(rebuildCallback);
+-  });
+-
+-  // Add reset all colors option to info panel
+-  addResetColorButton(rebuildCallback);
+-}
+-
+-/**
+- * Toggle color customization mode
+- */
+-let isColorMode = false;
++  if (!colorSettingsPanel) {
++    console.error("❌ Color settings panel not found!");
++    return;
++  }
+ 
+-function toggleColorMode(rebuildCallback) {
+-  isColorMode = !isColorMode;
+-  const toggleBtn = document.getElementById("color-settings-toggle");
++  const closeBtn = colorSettingsPanel.querySelector(".close-btn");
++  const applyBtn = document.getElementById("apply-colors");
++  const resetBtn = document.getElementById("reset-colors");
+ 
+-  if (isColorMode) {
+-    toggleBtn.textContent = "Exit Paint Mode";
+-    toggleBtn.style.background = "#ff9800";
+-    showColorModeInstructions();
+-    enableKeyColorSelection();
+-  } else {
+-    toggleBtn.textContent = "Paint Keys";
+-    toggleBtn.style.background = "";
+-    hideColorModeInstructions();
+-    disableKeyColorSelection();
+-    hideColorPicker();
+-    clearSelection();
++  if (!closeBtn || !applyBtn || !resetBtn) {
++    console.error("❌ Color settings panel buttons not found!");
++    return;
+   }
+-}
+ 
+-/**
+- * Show color mode instructions
+- */
+-function showColorModeInstructions() {
+-  const interactiveHelp = document.getElementById("interactive-help");
+-  if (interactiveHelp) {
+-    interactiveHelp.innerHTML = "🎨 Click keys to paint them!<br><small>Shift+Click for multiple</small>";
+-    interactiveHelp.style.color = "#ff9800";
++  // Color inputs
++  const colorInputs = {
++    letters: document.getElementById("color-letters"),
++    numbers: document.getElementById("color-numbers"),
++    modifiers: document.getElementById("color-modifiers"),
++    navigation: document.getElementById("color-navigation"),
++    special: document.getElementById("color-special"),
++    layerSwitch: document.getElementById("color-layerSwitch"),
++    empty: document.getElementById("color-empty"),
++  };
++
++  // Check if all inputs exist
++  const missingInputs = Object.entries(colorInputs).filter(([k, v]) => !v);
++  if (missingInputs.length > 0) {
++    console.error(
++      "❌ Missing color inputs:",
++      missingInputs.map(([k]) => k),
++    );
++    return;
+   }
+-}
+ 
+-/**
+- * Hide color mode instructions
+- */
+-function hideColorModeInstructions() {
+-  const interactiveHelp = document.getElementById("interactive-help");
+-  if (interactiveHelp) {
+-    interactiveHelp.textContent = "🖱️ Click modifier keys to see combinations!";
+-    interactiveHelp.style.color = "";
+-  }
+-}
++  // Load current colors into inputs
++  loadCurrentColors(colorInputs);
+ 
+-/**
+- * Enable key color selection on click
+- */
+-function enableKeyColorSelection() {
+-  // Add click listeners to all key objects
+-  document.addEventListener("click", handleKeyColorClick);
+-}
++  // Toggle panel visibility
++  colorSettingsToggle.addEventListener("click", () => {
++    console.log("🎨 Opening color settings panel");
++    colorSettingsPanel.classList.add("active");
++    loadCurrentColors(colorInputs);
++  });
+ 
+-/**
+- * Disable key color selection
+- */
+-function disableKeyColorSelection() {
+-  document.removeEventListener("click", handleKeyColorClick);
+-}
++  // Close panel
++  closeBtn.addEventListener("click", () => {
++    console.log("🎨 Closing color settings panel");
++    colorSettingsPanel.classList.remove("active");
++  });
+ 
+-/**
+- * Handle key click for color selection
+- */
+-function handleKeyColorClick(event) {
+-  if (!isColorMode) return;
++  // Close on Escape key
++  document.addEventListener("keydown", (e) => {
++    if (e.key === "Escape" && colorSettingsPanel.classList.contains("active")) {
++      colorSettingsPanel.classList.remove("active");
++    }
++  });
++
++  // Apply colors
++  applyBtn.addEventListener("click", () => {
++    applyCustomColors(colorInputs);
++    saveCustomColors();
++    updateLegendColors();
+ 
+-  // Use raycasting from interactions module
+-  if (!window.keyboardApp || !window.keyboardApp.camera) return;
+-  
+-  const clickedKey = getIntersectedKeyFromEvent(event, window.keyboardApp.camera);
+-  
+-  if (clickedKey) {
+-    if (event.shiftKey) {
+-      // Multi-select mode
+-      toggleKeySelection(clickedKey);
+-    } else {
+-      // Single select mode
+-      clearSelection();
+-      selectKey(clickedKey);
++    if (rebuildCallback) {
++      rebuildCallback();
+     }
+-    
+-    showColorPickerForSelection();
+-  }
+-}
+ 
+-/**
+- * Toggle key selection
+- */
+-function toggleKeySelection(keyObj) {
+-  const keyId = `${keyObj.layerName}:${keyObj.row}:${keyObj.col}`;
+-  
+-  if (selectedKeys.has(keyId)) {
+-    selectedKeys.delete(keyId);
+-    unhighlightKey(keyObj);
+-  } else {
+-    selectedKeys.add(keyId);
+-    highlightKey(keyObj);
+-  }
+-  
+-  updateSelectionCount();
+-}
++    console.log("🎨 Colors applied successfully");
+ 
+-/**
+- * Select a single key
+- */
+-function selectKey(keyObj) {
+-  const keyId = `${keyObj.layerName}:${keyObj.row}:${keyObj.col}`;
+-  selectedKeys.add(keyId);
+-  highlightKey(keyObj);
+-  updateSelectionCount();
+-}
++    // Show feedback
++    const originalText = applyBtn.textContent;
++    applyBtn.textContent = "Applied!";
++    applyBtn.style.background = "rgba(76, 175, 80, 1)";
++    setTimeout(() => {
++      applyBtn.textContent = originalText;
++      applyBtn.style.background = "";
++    }, 1500);
++  });
+ 
+-/**
+- * Clear all selections
+- */
+-function clearSelection() {
+-  // Unhighlight all selected keys
+-  keyObjects.forEach(keyObj => {
+-    unhighlightKey(keyObj);
++  // Reset colors
++  resetBtn.addEventListener("click", () => {
++    if (confirm("Reset all colors to default? This will reload the page.")) {
++      resetColorsToDefault();
++      location.reload();
++    }
+   });
+-  
+-  selectedKeys.clear();
+-  updateSelectionCount();
+-}
+ 
+-/**
+- * Highlight a selected key
+- */
+-function highlightKey(keyObj) {
+-  if (keyObj && keyObj.mesh) {
+-    keyObj.mesh.material.emissive.setHex(0xff9800);
+-    keyObj.mesh.material.emissiveIntensity = 0.3;
+-  }
+-}
++  // Real-time preview on color change
++  Object.entries(colorInputs).forEach(([type, input]) => {
++    input.addEventListener("input", () => {
++      const hexColor = input.value;
++      updateLegendPreview(type, hexColor);
++    });
++  });
+ 
+-/**
+- * Unhighlight a key
+- */
+-function unhighlightKey(keyObj) {
+-  if (keyObj && keyObj.mesh) {
+-    keyObj.mesh.material.emissive.setHex(0x000000);
+-    keyObj.mesh.material.emissiveIntensity = 0;
+-  }
+-}
++  // Initialize legend colors
++  updateLegendColors();
+ 
+-/**
+- * Update selection count display
+- */
+-function updateSelectionCount() {
+-  const countElement = document.getElementById("selected-count");
+-  if (countElement) {
+-    countElement.textContent = selectedKeys.size;
+-  }
++  console.log("🎨 Color customization initialized");
+ }
+ 
+ /**
+- * Show color picker for current selection
++ * Load current colors into input fields
++ * @param {Object} colorInputs - Object containing color input elements
+  */
+-function showColorPickerForSelection() {
+-  if (selectedKeys.size === 0) return;
+-  
+-  // Get the first selected key to determine current color
+-  const firstKeyId = Array.from(selectedKeys)[0];
+-  const [layerName, row, col] = firstKeyId.split(":");
+-  
+-  const keyObj = keyObjects.find(
+-    ko => ko.layerName === layerName && 
+-          ko.row === parseInt(row) && 
+-          ko.col === parseInt(col)
+-  );
+-  
+-  if (keyObj && keyObj.mesh) {
+-    const currentColor = keyObj.mesh.material.color.getHex();
+-    const currentHex = `#${currentColor.toString(16).padStart(6, "0")}`;
+-    
+-    // Highlight the current color option if it matches
+-    const colorOptions = colorPickerElement.querySelectorAll(".color-option");
+-    colorOptions.forEach(btn => {
+-      if (btn.dataset.color.toLowerCase() === currentHex.toLowerCase()) {
+-        btn.classList.add("selected");
+-      } else {
+-        btn.classList.remove("selected");
+-      }
+-    });
+-  }
+-  
+-  colorPickerElement.style.display = "block";
++function loadCurrentColors(colorInputs) {
++  const currentColors = getKeyColors();
++
++  Object.entries(colorInputs).forEach(([type, input]) => {
++    if (currentColors[type] !== undefined) {
++      const hexColor = `#${currentColors[type].toString(16).padStart(6, "0")}`;
++      input.value = hexColor;
++    }
++  });
+ }
+ 
+ /**
+- * Hide color picker
++ * Apply custom colors from input fields
++ * @param {Object} colorInputs - Object containing color input elements
+  */
+-function hideColorPicker() {
+-  colorPickerElement.style.display = "none";
++function applyCustomColors(colorInputs) {
++  Object.entries(colorInputs).forEach(([type, input]) => {
++    const hexColor = input.value;
++    const colorValue = parseInt(hexColor.substring(1), 16);
++    updateKeyColor(type, colorValue);
++  });
+ }
+ 
+ /**
+- * Apply color to selected keys
+- * @param {string} hexColor - Hex color string (e.g., "#87ceeb")
++ * Update legend colors to match current settings
+  */
+-function applyColorToSelectedKeys(hexColor) {
+-  const colorValue = parseInt(hexColor.substring(1), 16);
+-  
+-  selectedKeys.forEach(keyId => {
+-    const [layerName, row, col] = keyId.split(":");
+-    updateKeyColor(layerName, parseInt(row), parseInt(col), colorValue);
+-    
+-    // Update the visual immediately
+-    const keyObj = keyObjects.find(
+-      ko => ko.layerName === layerName && 
+-            ko.row === parseInt(row) && 
+-            ko.col === parseInt(col)
+-    );
+-    
+-    if (keyObj && keyObj.mesh) {
+-      keyObj.mesh.material.color.setHex(colorValue);
+-      keyObj.mesh.material.needsUpdate = true;
+-      keyObj.mesh.userData.originalColor = colorValue;
+-      
+-      // Force material refresh
+-      if (keyObj.mesh.material.emissive) {
+-        keyObj.mesh.material.emissive.setHex(0x000000);
+-        keyObj.mesh.material.emissiveIntensity = 0;
+-      }
++function updateLegendColors() {
++  const currentColors = getKeyColors();
++  const legendItems = {
++    letters: document.getElementById("legend-letters"),
++    numbers: document.getElementById("legend-numbers"),
++    modifiers: document.getElementById("legend-modifiers"),
++    special: document.getElementById("legend-special"),
++    navigation: document.getElementById("legend-navigation"),
++    layerSwitch: document.getElementById("legend-layerSwitch"),
++  };
++
++  Object.entries(legendItems).forEach(([type, element]) => {
++    if (element && currentColors[type] !== undefined) {
++      const hexColor = `#${currentColors[type].toString(16).padStart(6, "0")}`;
++      element.style.background = hexColor;
+     }
+   });
+-  
+-  // Save colors to localStorage
+-  saveCustomColors();
+-  
+-  console.log(`🎨 Applied color ${hexColor} to ${selectedKeys.size} keys`);
+ }
+ 
+ /**
+- * Clear color from selected keys (reset to default)
++ * Update legend preview while dragging color picker
++ * @param {string} type - Key type
++ * @param {string} hexColor - Hex color string
+  */
+-function clearColorFromSelectedKeys() {
+-  const defaultColor = getDefaultKeyColor();
+-  
+-  selectedKeys.forEach(keyId => {
+-    const [layerName, row, col] = keyId.split(":");
+-    clearKeyColor(layerName, parseInt(row), parseInt(col));
+-    
+-    // Update the visual immediately
+-    const keyObj = keyObjects.find(
+-      ko => ko.layerName === layerName && 
+-            ko.row === parseInt(row) && 
+-            ko.col === parseInt(col)
+-    );
+-    
+-    if (keyObj && keyObj.mesh) {
+-      keyObj.mesh.material.color.setHex(defaultColor);
+-      keyObj.mesh.material.needsUpdate = true;
+-      keyObj.mesh.userData.originalColor = defaultColor;
+-      
+-      // Force material refresh
+-      if (keyObj.mesh.material.emissive) {
+-        keyObj.mesh.material.emissive.setHex(0x000000);
+-        keyObj.mesh.material.emissiveIntensity = 0;
+-      }
+-    }
+-  });
+-  
+-  // Save colors to localStorage
+-  saveCustomColors();
+-  
+-  // Show feedback
+-  const clearBtn = document.getElementById("clear-key-color");
+-  const originalText = clearBtn.textContent;
+-  clearBtn.textContent = "✓ Reset!";
+-  clearBtn.style.background = "#4caf50";
+-  setTimeout(() => {
+-    clearBtn.textContent = originalText;
+-    clearBtn.style.background = "";
+-  }, 1000);
+-  
+-  console.log(`🎨 Reset color for ${selectedKeys.size} keys`);
++function updateLegendPreview(type, hexColor) {
++  const legendElement = document.getElementById(`legend-${type}`);
++  if (legendElement) {
++    legendElement.style.background = hexColor;
++  }
+ }
+ 
+ /**
+- * Add reset all colors button to UI
++ * Convert hex color string to number
++ * @param {string} hexColor - Hex color string (e.g., "#ff9800")
++ * @returns {number} - Color as number
+  */
+-function addResetColorButton(rebuildCallback) {
+-  const legend = document.querySelector(".legend");
+-  if (!legend) return;
+-  
+-  // Check if button already exists
+-  if (document.getElementById("reset-all-colors")) return;
+-  
+-  const resetBtn = document.createElement("button");
+-  resetBtn.id = "reset-all-colors";
+-  resetBtn.className = "btn-customize";
+-  resetBtn.textContent = "Reset All";
+-  resetBtn.style.marginTop = "10px";
+-  resetBtn.style.width = "100%";
+-  
+-  resetBtn.addEventListener("click", () => {
+-    if (confirm("Reset all key colors to default? This cannot be undone.")) {
+-      resetColorsToDefault();
+-      
+-      if (rebuildCallback) {
+-        rebuildCallback();
+-      }
+-      
+-      console.log("🔄 Reset all key colors");
+-      
+-      // Show feedback
+-      resetBtn.textContent = "✓ Reset!";
+-      resetBtn.style.background = "#4caf50";
+-      setTimeout(() => {
+-        resetBtn.textContent = "Reset All";
+-        resetBtn.style.background = "";
+-      }, 1500);
+-    }
+-  });
+-  
+-  legend.appendChild(resetBtn);
++export function hexToNumber(hexColor) {
++  return parseInt(hexColor.substring(1), 16);
+ }
+ 
+ /**
+- * Check if color mode is active
+- * @returns {boolean}
++ * Convert color number to hex string
++ * @param {number} colorNumber - Color as number
++ * @returns {string} - Hex color string
+  */
+-export function isColorModeActive() {
+-  return isColorMode;
+-}
+\ No newline at end of file
++export function numberToHex(colorNumber) {
++  return `#${colorNumber.toString(16).padStart(6, "0")}`;
++}
+diff --git a/keyboard-visualizer/index.html b/keyboard-visualizer/index.html
+index 45da75d..816db65 100644
+--- a/keyboard-visualizer/index.html
++++ b/keyboard-visualizer/index.html
+@@ -61,16 +61,58 @@
+ 
+             <div class="legend">
+                 <div class="legend-header">
+-                    <strong>Customize Colors</strong>
++                    <strong>Key Colors</strong>
+                     <button id="color-settings-toggle" class="btn-customize">
+-                        Paint Keys
++                        Customize
+                     </button>
+                 </div>
+-                <div style="padding: 10px 0; font-size: 12px; color: #666; line-height: 1.6;">
+-                    <p style="margin: 5px 0;">Click "Paint Keys" to customize individual key colors.</p>
+-                    <p style="margin: 5px 0; font-size: 11px;">• Click any key to select it</p>
+-                    <p style="margin: 5px 0; font-size: 11px;">• Shift+Click for multiple keys</p>
+-                    <p style="margin: 5px 0; font-size: 11px;">• Choose a color and apply</p>
++                <div class="legend-item">
++                    <div
++                        class="legend-color"
++                        id="legend-letters"
++                        style="background: #4caf50"
++                    ></div>
++                    <span>Letters</span>
++                </div>
++                <div class="legend-item">
++                    <div
++                        class="legend-color"
++                        id="legend-numbers"
++                        style="background: #2196f3"
++                    ></div>
++                    <span>Numbers</span>
++                </div>
++                <div class="legend-item">
++                    <div
++                        class="legend-color"
++                        id="legend-modifiers"
++                        style="background: #ff9800"
++                    ></div>
++                    <span>Modifiers (Click me!)</span>
++                </div>
++                <div class="legend-item">
++                    <div
++                        class="legend-color"
++                        id="legend-special"
++                        style="background: #9c27b0"
++                    ></div>
++                    <span>Special</span>
++                </div>
++                <div class="legend-item">
++                    <div
++                        class="legend-color"
++                        id="legend-navigation"
++                        style="background: #f44336"
++                    ></div>
++                    <span>Navigation</span>
++                </div>
++                <div class="legend-item">
++                    <div
++                        class="legend-color"
++                        id="legend-layerSwitch"
++                        style="background: #00bcd4"
++                    ></div>
++                    <span>Layer Switch</span>
+                 </div>
+             </div>
+ 
+@@ -147,6 +189,76 @@
+                 </div>
+             </div>
+ 
++            <div id="color-settings-panel">
++                    <button class="close-btn">×</button>
++                    <h2>Customize Key Colors</h2>
++                    <div class="color-settings-content">
++                        <div class="color-field">
++                            <label for="color-letters">Letters</label>
++                            <input
++                                type="color"
++                                id="color-letters"
++                                value="#4caf50"
++                            />
++                        </div>
++                        <div class="color-field">
++                            <label for="color-numbers">Numbers</label>
++                            <input
++                                type="color"
++                                id="color-numbers"
++                                value="#2196f3"
++                            />
++                        </div>
++                        <div class="color-field">
++                            <label for="color-modifiers">Modifiers</label>
++                            <input
++                                type="color"
++                                id="color-modifiers"
++                                value="#ff9800"
++                            />
++                        </div>
++                        <div class="color-field">
++                            <label for="color-navigation">Navigation</label>
++                            <input
++                                type="color"
++                                id="color-navigation"
++                                value="#f44336"
++                            />
++                        </div>
++                        <div class="color-field">
++                            <label for="color-special">Special</label>
++                            <input
++                                type="color"
++                                id="color-special"
++                                value="#9c27b0"
++                            />
++                        </div>
++                        <div class="color-field">
++                            <label for="color-layerSwitch">Layer Switch</label>
++                            <input
++                                type="color"
++                                id="color-layerSwitch"
++                                value="#00bcd4"
++                            />
++                        </div>
++                        <div class="color-field">
++                            <label for="color-empty">Empty Keys</label>
++                            <input
++                                type="color"
++                                id="color-empty"
++                                value="#424242"
++                            />
++                        </div>
++                        <div class="color-actions">
++                            <button id="apply-colors" class="btn">
++                                Apply Colors
++                            </button>
++                            <button id="reset-colors" class="btn btn-secondary">
++                                Reset to Default
++                            </button>
++                        </div>
++                    </div>
++                </div>
+             </div>
+         </div>
+ 
+diff --git a/keyboard-visualizer/interactions.js b/keyboard-visualizer/interactions.js
+index 09b8913..b697846 100644
+--- a/keyboard-visualizer/interactions.js
++++ b/keyboard-visualizer/interactions.js
+@@ -20,16 +20,6 @@ import {
+   getKeymap,
+ } from "./keymap-data.js";
+ 
+-// Import color mode state
+-let isColorModeActive = () => false;
+-
+-/**
+- * Set color mode checker function
+- */
+-export function setColorModeChecker(checkerFn) {
+-  isColorModeActive = checkerFn;
+-}
+-
+ /**
+  * Interaction state
+  */
+@@ -250,11 +240,6 @@ function hideCombinationsPanel() {
+  * @param {THREE.Camera} camera - The camera
+  */
+ export function handleClick(event, camera) {
+-  // Don't handle clicks in color mode - let color-customization handle it
+-  if (isColorModeActive()) {
+-    return;
+-  }
+-  
+   updateMousePosition(event);
+   const keyObj = getIntersectedKey(camera);
+ 
+@@ -279,9 +264,9 @@ export function handleMouseMove(event, camera, renderer) {
+   const keyObj = getIntersectedKey(camera);
+ 
+   if (keyObj) {
+-    // In color mode or edit mode, all keys are clickable
++    // In edit mode, all keys are clickable
+     const isClickable =
+-      isColorModeActive() || interactionState.editMode || isModifierKey(keyObj.label);
++      interactionState.editMode || isModifierKey(keyObj.label);
+ 
+     // Update cursor style
+     if (isClickable) {
+@@ -519,14 +504,3 @@ export function setupInteractions(camera, renderer) {
+     "Interactions initialized - click on modifier keys (Ctrl, Shift, Alt, GUI) to see combinations!",
+   );
+ }
+-
+-/**
+- * Get intersected key for external use (e.g., color customization)
+- * @param {MouseEvent} event - Mouse event
+- * @param {THREE.Camera} camera - The camera
+- * @returns {Object|null} - Key object or null
+- */
+-export function getIntersectedKeyFromEvent(event, camera) {
+-  updateMousePosition(event);
+-  return getIntersectedKey(camera);
+-}
+diff --git a/keyboard-visualizer/keyboard.js b/keyboard-visualizer/keyboard.js
+index 2a83c8f..b21dab9 100644
+--- a/keyboard-visualizer/keyboard.js
++++ b/keyboard-visualizer/keyboard.js
+@@ -1,7 +1,6 @@
+ // Keyboard builder module - Creates 3D keyboard representations
+ 
+ import { getKeyColor, createTextTexture } from "./utils.js";
+-import { getKeyColorAt } from "./keymap-data.js";
+ 
+ /**
+  * Keyboard configuration constants
+@@ -31,22 +30,19 @@ export const keyObjects = [];
+  * @param {number} z - Z position
+  * @param {number} tilt - Rotation tilt
+  * @param {string} layerName - Layer name this key belongs to (optional)
+- * @param {number} row - Row index (optional)
+- * @param {number} col - Column index (optional)
+  * @returns {Object} - Object containing key mesh and sprite
+  */
+-export function createKey(keyLabel, x, y, z, tilt, layerName = null, row = null, col = null) {
++export function createKey(keyLabel, x, y, z, tilt, layerName = null) {
+   const { keyWidth, keyHeight, keyDepth } = KEYBOARD_CONFIG;
+ 
+   // Create key geometry - mechanical keyboard style with better definition
+   const geometry = new THREE.BoxGeometry(keyWidth, keyHeight, keyDepth);
+   const material = new THREE.MeshStandardMaterial({
+-    color: getKeyColor(keyLabel, layerName, row, col),
+-    roughness: 0.8,
+-    metalness: 0.0,
++    color: getKeyColor(keyLabel),
++    roughness: 0.5,
++    metalness: 0.05,
+     emissive: 0x000000,
+     emissiveIntensity: 0,
+-    flatShading: false,
+   });
+ 
+   const key = new THREE.Mesh(geometry, material);
+@@ -58,12 +54,10 @@ export function createKey(keyLabel, x, y, z, tilt, layerName = null, row = null,
+   // Store metadata on the key object
+   key.userData = {
+     label: keyLabel,
+-    originalColor: getKeyColor(keyLabel, layerName, row, col),
++    originalColor: getKeyColor(keyLabel),
+     originalScale: { x: 1, y: 1, z: 1 },
+     isKey: true,
+     layerName: layerName,
+-    row: row,
+-    col: col,
+   };
+ 
+   // Create text label as decal on top of key (printed look)
+@@ -111,7 +105,7 @@ export function createKeyboard(keymap, offsetX, side = "left", layerName = null)
+       const z = row * (keyDepth + spacing);
+ 
+       // Create key and sprite
+-      const { key, sprite } = createKey(keyLabel, x, y, z, tilt, layerName, row, keyIndex);
++      const { key, sprite } = createKey(keyLabel, x, y, z, tilt, layerName);
+ 
+       // Store reference for interactions
+       keyObjects.push({
+@@ -120,7 +114,7 @@ export function createKeyboard(keymap, offsetX, side = "left", layerName = null)
+         label: keyLabel,
+         side: side,
+         row: row,
+-        col: keyIndex,
++        col: col,
+         group: group,
+         layerName: layerName,
+       });
+diff --git a/keyboard-visualizer/keymap-data.js b/keyboard-visualizer/keymap-data.js
+index 345c32e..c2590da 100644
+--- a/keyboard-visualizer/keymap-data.js
++++ b/keyboard-visualizer/keymap-data.js
+@@ -29,11 +29,19 @@ export let currentLayerName = "default";
+ export let keymapModifications = {};
+ export let hasModifications = false;
+ 
+-// Default color for all keys
+-export const defaultKeyColor = 0xf5e6d3; // Cream colored (like nice PBT keycaps)
++// Default key color mapping - cream alphabet, pink layers, blue modifiers
++export const defaultKeyColors = {
++  letters: 0xf5e6d3, // Cream colored (like nice PBT keycaps)
++  numbers: 0xf5e6d3, // Cream colored
++  modifiers: 0x64b5f6, // Blue for actions/modifiers
++  navigation: 0x64b5f6, // Blue for navigation
++  special: 0xe0e0e0, // Light gray for special chars
++  layerSwitch: 0xf48fb1, // Pink for layer switching
++  empty: 0x6e6e6e, // Dark gray for empty keys
++};
+ 
+-// Per-key color storage: { "layer:row:col": hexColor }
+-export const keyColors = {};
++// Current key colors (can be customized)
++export let keyColors = { ...defaultKeyColors };
+ 
+ // Load custom colors from localStorage if available
+ function loadCustomColors() {
+@@ -41,9 +49,7 @@ function loadCustomColors() {
+     const saved = localStorage.getItem("keyColors");
+     if (saved) {
+       const customColors = JSON.parse(saved);
+-      // Clear and update in-place
+-      Object.keys(keyColors).forEach(key => delete keyColors[key]);
+-      Object.assign(keyColors, customColors);
++      keyColors = { ...defaultKeyColors, ...customColors };
+       console.log("✅ Loaded custom key colors from storage");
+       return true;
+     }
+@@ -56,6 +62,41 @@ function loadCustomColors() {
+ // Initialize colors on module load
+ loadCustomColors();
+ 
++// Key type classification
++export const keyTypes = {
++  letters: "QWERTYUIOPASDFGHJKLZXCVBNM",
++  numbers: "1234567890",
++  modifiers: ["CTRL", "GUI", "ALT", "SHFT", "TAB", "CAPS", "ESC"],
++  navigation: [
++    "BSPC",
++    "ENT",
++    "SPC",
++    "←",
++    "→",
++    "↑",
++    "↓",
++    "HOME",
++    "END",
++    "PGUP",
++    "PGDN",
++  ],
++  layerSwitch: [
++    "L0",
++    "L1",
++    "L2",
++    "L3",
++    "LT0",
++    "LT1",
++    "LT2",
++    "LT3",
++    "TO0",
++    "TO1",
++    "TO2",
++    "TO3",
++  ],
++  empty: ["✕", "▽"],
++};
++
+ // Key combinations data
+ export const keyCombinations = {
+   CTRL: [
+@@ -345,44 +386,20 @@ export function resetModifications() {
+ }
+ 
+ /**
+- * Update key color for a specific position
+- * @param {string} layerName - Layer name
+- * @param {number} row - Row index
+- * @param {number} col - Column index
++ * Update key color for a specific type
++ * @param {string} type - Key type (letters, numbers, modifiers, etc.)
+  * @param {number} color - Hex color code
+  */
+-export function updateKeyColor(layerName, row, col, color) {
+-  const key = `${layerName}:${row}:${col}`;
+-  keyColors[key] = color;
+-  console.log(
+-    `🎨 Updated key [${layerName}:${row}:${col}] color to #${color.toString(16).padStart(6, "0")}`,
+-  );
+-  return true;
+-}
+-
+-/**
+- * Get key color for a specific position
+- * @param {string} layerName - Layer name
+- * @param {number} row - Row index
+- * @param {number} col - Column index
+- * @returns {number} - Hex color code
+- */
+-export function getKeyColorAt(layerName, row, col) {
+-  const key = `${layerName}:${row}:${col}`;
+-  return keyColors[key] !== undefined ? keyColors[key] : defaultKeyColor;
+-}
+-
+-/**
+- * Clear key color for a specific position (revert to default)
+- * @param {string} layerName - Layer name
+- * @param {number} row - Row index
+- * @param {number} col - Column index
+- */
+-export function clearKeyColor(layerName, row, col) {
+-  const key = `${layerName}:${row}:${col}`;
+-  delete keyColors[key];
+-  console.log(`🎨 Cleared color for key [${layerName}:${row}:${col}]`);
+-  return true;
++export function updateKeyColor(type, color) {
++  if (keyColors.hasOwnProperty(type)) {
++    keyColors[type] = color;
++    console.log(
++      `🎨 Updated ${type} color to #${color.toString(16).padStart(6, "0")}`,
++    );
++    return true;
++  }
++  console.warn(`⚠️  Unknown key type: ${type}`);
++  return false;
+ }
+ 
+ /**
+@@ -400,11 +417,10 @@ export function saveCustomColors() {
+ }
+ 
+ /**
+- * Reset colors to default (clear all custom colors)
++ * Reset colors to default
+  */
+ export function resetColorsToDefault() {
+-  // Clear all custom colors
+-  Object.keys(keyColors).forEach(key => delete keyColors[key]);
++  keyColors = { ...defaultKeyColors };
+   try {
+     localStorage.removeItem("keyColors");
+     console.log("🔄 Reset colors to default");
+@@ -416,15 +432,15 @@ export function resetColorsToDefault() {
+ }
+ 
+ /**
+- * Get all custom key colors
++ * Get current key colors
+  */
+ export function getKeyColors() {
+   return { ...keyColors };
+ }
+ 
+ /**
+- * Get default key color
++ * Get default key colors
+  */
+-export function getDefaultKeyColor() {
+-  return defaultKeyColor;
++export function getDefaultKeyColors() {
++  return { ...defaultKeyColors };
+ }
+diff --git a/keyboard-visualizer/scene.js b/keyboard-visualizer/scene.js
+index 7e2b262..431028e 100644
+--- a/keyboard-visualizer/scene.js
++++ b/keyboard-visualizer/scene.js
+@@ -67,12 +67,12 @@ export function createControls(camera, domElement) {
+  * @param {THREE.Scene} scene - The scene to add lights to
+  */
+ export function setupLights(scene) {
+-  // Softer ambient light for better contrast and color visibility
+-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
++  // Softer ambient light for better contrast
++  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+   scene.add(ambientLight);
+ 
+-  // Main window light - reduced intensity to preserve keycap colors
+-  const windowLight = new THREE.DirectionalLight(0xffffff, 0.7);
++  // Main window light - bright and soft
++  const windowLight = new THREE.DirectionalLight(0xfff9f0, 1.2);
+   windowLight.position.set(0, 30, -40);
+   windowLight.castShadow = true;
+   windowLight.shadow.camera.left = -50;
+@@ -84,13 +84,13 @@ export function setupLights(scene) {
+   windowLight.shadow.bias = -0.0001;
+   scene.add(windowLight);
+ 
+-  // Soft fill light from sides - reduced to prevent washout
+-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.25);
++  // Soft fill light from sides
++  const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+   fillLight.position.set(-20, 20, 10);
+   scene.add(fillLight);
+ 
+-  // Hemisphere light for natural ambient - reduced
+-  const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe8e8e8, 0.2);
++  // Hemisphere light for natural ambient
++  const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe8e8e8, 0.3);
+   scene.add(hemiLight);
+ 
+   return { ambientLight, windowLight, fillLight, hemiLight };
+diff --git a/keyboard-visualizer/styles.css b/keyboard-visualizer/styles.css
+index 8743a29..c6b1d07 100644
+--- a/keyboard-visualizer/styles.css
++++ b/keyboard-visualizer/styles.css
+@@ -153,7 +153,7 @@ body {
+     align-items: center;
+     margin-bottom: 12px;
+     padding-bottom: 8px;
+-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
++    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+ }
+ 
+ .legend-header strong {
+@@ -202,134 +202,6 @@ body {
+     border: 1px solid rgba(0, 0, 0, 0.2);
+ }
+ 
+-/* Key Color Picker */
+-.color-palette {
+-    display: grid;
+-    grid-template-columns: repeat(4, 1fr);
+-    gap: 10px;
+-    margin-bottom: 15px;
+-}
+-
+-.color-option {
+-    width: 100%;
+-    aspect-ratio: 1;
+-    border: 3px solid transparent;
+-    border-radius: 8px;
+-    cursor: pointer;
+-    transition: all 0.2s;
+-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+-    position: relative;
+-}
+-
+-.color-option:hover {
+-    transform: scale(1.1);
+-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+-}
+-
+-.color-option.selected {
+-    border-color: #2c2c2c;
+-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2c2c2c;
+-}
+-
+-.color-option.selected::after {
+-    content: "✓";
+-    position: absolute;
+-    top: 50%;
+-    left: 50%;
+-    transform: translate(-50%, -50%);
+-    color: #2c2c2c;
+-    font-size: 24px;
+-    font-weight: bold;
+-    text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+-}
+-
+-/* Key Color Picker */
+-.key-color-picker {
+-    position: fixed;
+-    top: 50%;
+-    left: 50%;
+-    transform: translate(-50%, -50%);
+-    background: rgba(255, 255, 255, 0.98);
+-    padding: 20px;
+-    border-radius: 12px;
+-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+-    z-index: 300;
+-    min-width: 280px;
+-    backdrop-filter: blur(10px);
+-}
+-
+-.color-picker-header {
+-    display: flex;
+-    justify-content: space-between;
+-    align-items: center;
+-    margin-bottom: 15px;
+-    padding-bottom: 10px;
+-    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+-}
+-
+-.color-picker-title {
+-    font-size: 16px;
+-    font-weight: 600;
+-    color: #2c2c2c;
+-}
+-
+-.color-picker-close {
+-    background: rgba(0, 0, 0, 0.05);
+-    border: none;
+-    color: #666;
+-    width: 28px;
+-    height: 28px;
+-    border-radius: 50%;
+-    cursor: pointer;
+-    font-size: 20px;
+-    display: flex;
+-    align-items: center;
+-    justify-content: center;
+-    transition: background 0.2s;
+-    padding: 0;
+-    line-height: 1;
+-}
+-
+-.color-picker-close:hover {
+-    background: rgba(0, 0, 0, 0.1);
+-    color: #2c2c2c;
+-}
+-
+-.color-picker-body {
+-    display: flex;
+-    flex-direction: column;
+-    gap: 12px;
+-}
+-
+-.color-picker-actions {
+-    display: flex;
+-    gap: 8px;
+-}
+-
+-.btn-small {
+-    width: 100%;
+-    padding: 8px 12px;
+-    font-size: 13px;
+-}
+-
+-.color-picker-info {
+-    display: flex;
+-    flex-direction: column;
+-    gap: 4px;
+-    padding-top: 8px;
+-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+-}
+-
+-.color-picker-info small {
+-    font-size: 11px;
+-    color: #666;
+-}
+-
+-#selected-count {
+-    font-weight: 600;
+-    color: #90caf9;
+-}
+-
+ #canvas {
+     display: block;
+ }
+@@ -633,7 +505,7 @@ body {
+     font-size: 20px;
+     margin-bottom: 20px;
+     color: #4caf50;
+-    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
++    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+     padding-bottom: 10px;
+ }
+ 
+@@ -641,9 +513,9 @@ body {
+     position: absolute;
+     top: 10px;
+     right: 10px;
+-    background: rgba(0, 0, 0, 0.05);
++    background: rgba(255, 255, 255, 0.1);
+     border: none;
+-    color: #666;
++    color: white;
+     width: 30px;
+     height: 30px;
+     border-radius: 50%;
+@@ -656,8 +528,7 @@ body {
+ }
+ 
+ #color-settings-panel .close-btn:hover {
+-    background: rgba(0, 0, 0, 0.1);
+-    color: #2c2c2c;
++    background: rgba(255, 255, 255, 0.2);
+ }
+ 
+ .color-settings-content {
+@@ -675,22 +546,22 @@ body {
+ 
+ .color-field label {
+     font-size: 14px;
+-    color: #2c2c2c;
++    color: rgba(255, 255, 255, 0.9);
+     flex: 1;
+ }
+ 
+ .color-field input[type="color"] {
+     width: 60px;
+     height: 40px;
+-    border: 2px solid #d4d4d4;
++    border: 2px solid rgba(255, 255, 255, 0.3);
+     border-radius: 5px;
+-    background: white;
++    background: rgba(255, 255, 255, 0.1);
+     cursor: pointer;
+     transition: all 0.2s;
+ }
+ 
+ .color-field input[type="color"]:hover {
+-    border-color: #bbb;
++    border-color: rgba(255, 255, 255, 0.5);
+     transform: scale(1.05);
+ }
+ 
+diff --git a/keyboard-visualizer/utils.js b/keyboard-visualizer/utils.js
+index f565de7..379b0e3 100644
+--- a/keyboard-visualizer/utils.js
++++ b/keyboard-visualizer/utils.js
+@@ -1,23 +1,59 @@
+ // Utility functions for the keyboard visualizer
+ 
+-import { getKeyColorAt, defaultKeyColor } from "./keymap-data.js";
++import { keyColors } from "./keymap-data.js";
+ 
+ /**
+- * Get the color for a key based on its position
+- * @param {string} keyLabel - The label of the key (unused, kept for compatibility)
+- * @param {string} layerName - Layer name
+- * @param {number} row - Row index
+- * @param {number} col - Column index
++ * Get the color for a key based on its label
++ * @param {string} keyLabel - The label of the key
+  * @returns {number} - Hex color code
+  */
+-export function getKeyColor(keyLabel, layerName = null, row = null, col = null) {
+-  // If position info is provided, use per-key color lookup
+-  if (layerName !== null && row !== null && col !== null) {
+-    return getKeyColorAt(layerName, row, col);
++export function getKeyColor(keyLabel) {
++  const letters = "QWERTYUIOPASDFGHJKLZXCVBNM";
++  const numbers = "1234567890";
++  const modifiers = ["CTRL", "GUI", "ALT", "SHFT", "TAB", "CAPS", "ESC"];
++  const navigation = [
++    "BSPC",
++    "ENT",
++    "SPC",
++    "←",
++    "→",
++    "↑",
++    "↓",
++    "HOME",
++    "END",
++    "PGUP",
++    "PGDN",
++  ];
++  const layerSwitch = /^(L\d+|LT\d+|TO\d+)$/;
++  const empty = ["✕", "▽", "", " ", "NONE", "TRANS", "&trans", "&none"];
++  const bluetooth = /^BT/;
++
++  // Empty, unmapped, or transparent keys - return gray
++  if (!keyLabel || keyLabel.trim() === "" || empty.includes(keyLabel)) {
++    return keyColors.empty;
++  }
++
++  // Layer switch keys
++  if (layerSwitch.test(keyLabel)) {
++    return keyColors.layerSwitch;
++  }
++
++  // Bluetooth keys
++  if (bluetooth.test(keyLabel)) {
++    return keyColors.special;
++  }
++
++  if (letters.includes(keyLabel)) {
++    return keyColors.letters;
++  } else if (numbers.includes(keyLabel)) {
++    return keyColors.numbers;
++  } else if (modifiers.includes(keyLabel)) {
++    return keyColors.modifiers;
++  } else if (navigation.includes(keyLabel)) {
++    return keyColors.navigation;
++  } else {
++    return keyColors.special;
+   }
+-  
+-  // Fallback to default color
+-  return defaultKeyColor;
+ }
+ 
+ /**
