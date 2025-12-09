@@ -1,0 +1,25 @@
+**NEVER** EDIT OR CREATE ANY MARKDOWN FILES UNLESS EXPLICITLY ASKED BY THE USER TO DO SO.
+
+## Source of Truth
+- **Always** consult keyboard_visualizer/keyboard_visualizer.spec in this directory for:
+  - Technology stack and architecture decisions
+  - Project requirements and constraints
+  - Implementation details and standards
+- The spec file is the authoritative reference for all project decisions
+- **ALWAYS** If you change anything in the app that is not in the spec file, update the spec file accordingly
+
+## Code Style
+- No emoji in code, comments, or console output
+- Minimize comments - code should be self-documenting
+- Only add comments when explaining complex logic or non-obvious decisions
+- Use clear, descriptive variable and function names
+
+## Documentation Sources
+- **ALWAYS** Use context7 MCP server to access latest documentation for all libraries OR remote repositories. Some are listed below:
+  -- /zmkfirmware/zmk
+  -- Three.js
+- Stay current with official docs rather than relying on outdated information
+
+## Other
+- No build step required - pure vanilla JS
+- Works with Python/PHP/Node HTTP serverss
