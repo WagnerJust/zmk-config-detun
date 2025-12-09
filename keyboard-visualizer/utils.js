@@ -1,59 +1,23 @@
 // Utility functions for the keyboard visualizer
 
-import { keyColors } from "./keymap-data.js";
+import { getKeyColorAt, defaultKeyColor } from "./keymap-data.js";
 
 /**
- * Get the color for a key based on its label
- * @param {string} keyLabel - The label of the key
+ * Get the color for a key based on its position
+ * @param {string} keyLabel - The label of the key (unused, kept for compatibility)
+ * @param {string} layerName - Layer name
+ * @param {number} row - Row index
+ * @param {number} col - Column index
  * @returns {number} - Hex color code
  */
-export function getKeyColor(keyLabel) {
-  const letters = "QWERTYUIOPASDFGHJKLZXCVBNM";
-  const numbers = "1234567890";
-  const modifiers = ["CTRL", "GUI", "ALT", "SHFT", "TAB", "CAPS", "ESC"];
-  const navigation = [
-    "BSPC",
-    "ENT",
-    "SPC",
-    "←",
-    "→",
-    "↑",
-    "↓",
-    "HOME",
-    "END",
-    "PGUP",
-    "PGDN",
-  ];
-  const layerSwitch = /^(L\d+|LT\d+|TO\d+)$/;
-  const empty = ["✕", "▽", "", " ", "NONE", "TRANS", "&trans", "&none"];
-  const bluetooth = /^BT/;
-
-  // Empty, unmapped, or transparent keys - return gray
-  if (!keyLabel || keyLabel.trim() === "" || empty.includes(keyLabel)) {
-    return keyColors.empty;
+export function getKeyColor(keyLabel, layerName = null, row = null, col = null) {
+  // If position info is provided, use per-key color lookup
+  if (layerName !== null && row !== null && col !== null) {
+    return getKeyColorAt(layerName, row, col);
   }
-
-  // Layer switch keys
-  if (layerSwitch.test(keyLabel)) {
-    return keyColors.layerSwitch;
-  }
-
-  // Bluetooth keys
-  if (bluetooth.test(keyLabel)) {
-    return keyColors.special;
-  }
-
-  if (letters.includes(keyLabel)) {
-    return keyColors.letters;
-  } else if (numbers.includes(keyLabel)) {
-    return keyColors.numbers;
-  } else if (modifiers.includes(keyLabel)) {
-    return keyColors.modifiers;
-  } else if (navigation.includes(keyLabel)) {
-    return keyColors.navigation;
-  } else {
-    return keyColors.special;
-  }
+  
+  // Fallback to default color
+  return defaultKeyColor;
 }
 
 /**

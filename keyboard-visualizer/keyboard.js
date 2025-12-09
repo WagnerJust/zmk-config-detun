@@ -1,6 +1,7 @@
 // Keyboard builder module - Creates 3D keyboard representations
 
 import { getKeyColor, createTextTexture } from "./utils.js";
+import { getKeyColorAt } from "./keymap-data.js";
 
 /**
  * Keyboard configuration constants
@@ -30,19 +31,22 @@ export const keyObjects = [];
  * @param {number} z - Z position
  * @param {number} tilt - Rotation tilt
  * @param {string} layerName - Layer name this key belongs to (optional)
+ * @param {number} row - Row index (optional)
+ * @param {number} col - Column index (optional)
  * @returns {Object} - Object containing key mesh and sprite
  */
-export function createKey(keyLabel, x, y, z, tilt, layerName = null) {
+export function createKey(keyLabel, x, y, z, tilt, layerName = null, row = null, col = null) {
   const { keyWidth, keyHeight, keyDepth } = KEYBOARD_CONFIG;
 
   // Create key geometry - mechanical keyboard style with better definition
   const geometry = new THREE.BoxGeometry(keyWidth, keyHeight, keyDepth);
   const material = new THREE.MeshStandardMaterial({
-    color: getKeyColor(keyLabel),
-    roughness: 0.5,
-    metalness: 0.05,
+    color: getKeyColor(keyLabel, layerName, row, col),
+    roughness: 0.8,
+    metalness: 0.0,
     emissive: 0x000000,
     emissiveIntensity: 0,
+    flatShading: false,
   });
 
   const key = new THREE.Mesh(geometry, material);
@@ -54,10 +58,12 @@ export function createKey(keyLabel, x, y, z, tilt, layerName = null) {
   // Store metadata on the key object
   key.userData = {
     label: keyLabel,
-    originalColor: getKeyColor(keyLabel),
+    originalColor: getKeyColor(keyLabel, layerName, row, col),
     originalScale: { x: 1, y: 1, z: 1 },
     isKey: true,
     layerName: layerName,
+    row: row,
+    col: col,
   };
 
   // Create text label as decal on top of key (printed look)
@@ -105,7 +111,7 @@ export function createKeyboard(keymap, offsetX, side = "left", layerName = null)
       const z = row * (keyDepth + spacing);
 
       // Create key and sprite
-      const { key, sprite } = createKey(keyLabel, x, y, z, tilt, layerName);
+      const { key, sprite } = createKey(keyLabel, x, y, z, tilt, layerName, row, keyIndex);
 
       // Store reference for interactions
       keyObjects.push({
@@ -114,7 +120,7 @@ export function createKeyboard(keymap, offsetX, side = "left", layerName = null)
         label: keyLabel,
         side: side,
         row: row,
-        col: col,
+        col: keyIndex,
         group: group,
         layerName: layerName,
       });

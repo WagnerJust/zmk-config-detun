@@ -67,12 +67,12 @@ export function createControls(camera, domElement) {
  * @param {THREE.Scene} scene - The scene to add lights to
  */
 export function setupLights(scene) {
-  // Softer ambient light for better contrast
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+  // Softer ambient light for better contrast and color visibility
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
 
-  // Main window light - bright and soft
-  const windowLight = new THREE.DirectionalLight(0xfff9f0, 1.2);
+  // Main window light - reduced intensity to preserve keycap colors
+  const windowLight = new THREE.DirectionalLight(0xffffff, 0.7);
   windowLight.position.set(0, 30, -40);
   windowLight.castShadow = true;
   windowLight.shadow.camera.left = -50;
@@ -84,13 +84,13 @@ export function setupLights(scene) {
   windowLight.shadow.bias = -0.0001;
   scene.add(windowLight);
 
-  // Soft fill light from sides
-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+  // Soft fill light from sides - reduced to prevent washout
+  const fillLight = new THREE.DirectionalLight(0xffffff, 0.25);
   fillLight.position.set(-20, 20, 10);
   scene.add(fillLight);
 
-  // Hemisphere light for natural ambient
-  const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe8e8e8, 0.3);
+  // Hemisphere light for natural ambient - reduced
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe8e8e8, 0.2);
   scene.add(hemiLight);
 
   return { ambientLight, windowLight, fillLight, hemiLight };

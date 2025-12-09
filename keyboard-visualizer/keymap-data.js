@@ -29,19 +29,11 @@ export let currentLayerName = "default";
 export let keymapModifications = {};
 export let hasModifications = false;
 
-// Default key color mapping - cream alphabet, pink layers, blue modifiers
-export const defaultKeyColors = {
-  letters: 0xf5e6d3, // Cream colored (like nice PBT keycaps)
-  numbers: 0xf5e6d3, // Cream colored
-  modifiers: 0x64b5f6, // Blue for actions/modifiers
-  navigation: 0x64b5f6, // Blue for navigation
-  special: 0xe0e0e0, // Light gray for special chars
-  layerSwitch: 0xf48fb1, // Pink for layer switching
-  empty: 0x6e6e6e, // Dark gray for empty keys
-};
+// Default color for all keys
+export const defaultKeyColor = 0xf5e6d3; // Cream colored (like nice PBT keycaps)
 
-// Current key colors (can be customized)
-export let keyColors = { ...defaultKeyColors };
+// Per-key color storage: { "layer:row:col": hexColor }
+export const keyColors = {};
 
 // Load custom colors from localStorage if available
 function loadCustomColors() {
@@ -49,7 +41,9 @@ function loadCustomColors() {
     const saved = localStorage.getItem("keyColors");
     if (saved) {
       const customColors = JSON.parse(saved);
-      keyColors = { ...defaultKeyColors, ...customColors };
+      // Clear and update in-place
+      Object.keys(keyColors).forEach(key => delete keyColors[key]);
+      Object.assign(keyColors, customColors);
       console.log("✅ Loaded custom key colors from storage");
       return true;
     }
@@ -61,41 +55,6 @@ function loadCustomColors() {
 
 // Initialize colors on module load
 loadCustomColors();
-
-// Key type classification
-export const keyTypes = {
-  letters: "QWERTYUIOPASDFGHJKLZXCVBNM",
-  numbers: "1234567890",
-  modifiers: ["CTRL", "GUI", "ALT", "SHFT", "TAB", "CAPS", "ESC"],
-  navigation: [
-    "BSPC",
-    "ENT",
-    "SPC",
-    "←",
-    "→",
-    "↑",
-    "↓",
-    "HOME",
-    "END",
-    "PGUP",
-    "PGDN",
-  ],
-  layerSwitch: [
-    "L0",
-    "L1",
-    "L2",
-    "L3",
-    "LT0",
-    "LT1",
-    "LT2",
-    "LT3",
-    "TO0",
-    "TO1",
-    "TO2",
-    "TO3",
-  ],
-  empty: ["✕", "▽"],
-};
 
 // Key combinations data
 export const keyCombinations = {
@@ -386,20 +345,44 @@ export function resetModifications() {
 }
 
 /**
- * Update key color for a specific type
- * @param {string} type - Key type (letters, numbers, modifiers, etc.)
+ * Update key color for a specific position
+ * @param {string} layerName - Layer name
+ * @param {number} row - Row index
+ * @param {number} col - Column index
  * @param {number} color - Hex color code
  */
-export function updateKeyColor(type, color) {
-  if (keyColors.hasOwnProperty(type)) {
-    keyColors[type] = color;
-    console.log(
-      `🎨 Updated ${type} color to #${color.toString(16).padStart(6, "0")}`,
-    );
-    return true;
-  }
-  console.warn(`⚠️  Unknown key type: ${type}`);
-  return false;
+export function updateKeyColor(layerName, row, col, color) {
+  const key = `${layerName}:${row}:${col}`;
+  keyColors[key] = color;
+  console.log(
+    `🎨 Updated key [${layerName}:${row}:${col}] color to #${color.toString(16).padStart(6, "0")}`,
+  );
+  return true;
+}
+
+/**
+ * Get key color for a specific position
+ * @param {string} layerName - Layer name
+ * @param {number} row - Row index
+ * @param {number} col - Column index
+ * @returns {number} - Hex color code
+ */
+export function getKeyColorAt(layerName, row, col) {
+  const key = `${layerName}:${row}:${col}`;
+  return keyColors[key] !== undefined ? keyColors[key] : defaultKeyColor;
+}
+
+/**
+ * Clear key color for a specific position (revert to default)
+ * @param {string} layerName - Layer name
+ * @param {number} row - Row index
+ * @param {number} col - Column index
+ */
+export function clearKeyColor(layerName, row, col) {
+  const key = `${layerName}:${row}:${col}`;
+  delete keyColors[key];
+  console.log(`🎨 Cleared color for key [${layerName}:${row}:${col}]`);
+  return true;
 }
 
 /**
@@ -417,10 +400,11 @@ export function saveCustomColors() {
 }
 
 /**
- * Reset colors to default
+ * Reset colors to default (clear all custom colors)
  */
 export function resetColorsToDefault() {
-  keyColors = { ...defaultKeyColors };
+  // Clear all custom colors
+  Object.keys(keyColors).forEach(key => delete keyColors[key]);
   try {
     localStorage.removeItem("keyColors");
     console.log("🔄 Reset colors to default");
@@ -432,15 +416,15 @@ export function resetColorsToDefault() {
 }
 
 /**
- * Get current key colors
+ * Get all custom key colors
  */
 export function getKeyColors() {
   return { ...keyColors };
 }
 
 /**
- * Get default key colors
+ * Get default key color
  */
-export function getDefaultKeyColors() {
-  return { ...defaultKeyColors };
+export function getDefaultKeyColor() {
+  return defaultKeyColor;
 }

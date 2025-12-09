@@ -20,6 +20,16 @@ import {
   getKeymap,
 } from "./keymap-data.js";
 
+// Import color mode state
+let isColorModeActive = () => false;
+
+/**
+ * Set color mode checker function
+ */
+export function setColorModeChecker(checkerFn) {
+  isColorModeActive = checkerFn;
+}
+
 /**
  * Interaction state
  */
@@ -240,6 +250,11 @@ function hideCombinationsPanel() {
  * @param {THREE.Camera} camera - The camera
  */
 export function handleClick(event, camera) {
+  // Don't handle clicks in color mode - let color-customization handle it
+  if (isColorModeActive()) {
+    return;
+  }
+  
   updateMousePosition(event);
   const keyObj = getIntersectedKey(camera);
 
@@ -264,9 +279,9 @@ export function handleMouseMove(event, camera, renderer) {
   const keyObj = getIntersectedKey(camera);
 
   if (keyObj) {
-    // In edit mode, all keys are clickable
+    // In color mode or edit mode, all keys are clickable
     const isClickable =
-      interactionState.editMode || isModifierKey(keyObj.label);
+      isColorModeActive() || interactionState.editMode || isModifierKey(keyObj.label);
 
     // Update cursor style
     if (isClickable) {
@@ -503,4 +518,15 @@ export function setupInteractions(camera, renderer) {
   console.log(
     "Interactions initialized - click on modifier keys (Ctrl, Shift, Alt, GUI) to see combinations!",
   );
+}
+
+/**
+ * Get intersected key for external use (e.g., color customization)
+ * @param {MouseEvent} event - Mouse event
+ * @param {THREE.Camera} camera - The camera
+ * @returns {Object|null} - Key object or null
+ */
+export function getIntersectedKeyFromEvent(event, camera) {
+  updateMousePosition(event);
+  return getIntersectedKey(camera);
 }
