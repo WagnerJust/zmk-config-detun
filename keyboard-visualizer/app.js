@@ -9,6 +9,7 @@ import {
   exportKeymap,
 } from "./keymap-data.js";
 import { downloadZMKConfig } from "./zmk-exporter.js";
+import { saveAndNotify } from "./zmk-saver.js";
 import { initScene } from "./scene.js";
 import {
   createKeyboards,
@@ -111,7 +112,8 @@ async function init() {
     } else {
       // Single layer mode: show only current layer
       console.log("🎹 Creating single-layer view");
-      const keyboards = createKeyboards(keymap);
+      const currentLayerName = getCurrentLayerName();
+      const keyboards = createKeyboards(keymap, currentLayerName);
       app.leftKeyboard = keyboards.leftKeyboard;
       app.rightKeyboard = keyboards.rightKeyboard;
 
@@ -327,6 +329,8 @@ function handleLayerSwitch(layerName) {
         editBtn.textContent = "Edit Mode: OFF";
         editBtn.classList.remove("active");
         document.getElementById("export-keymap").style.display = "none";
+        document.getElementById("export-zmk-config").style.display = "none";
+        document.getElementById("save-and-load-config").style.display = "none";
       }
 
       console.log("✅ Switched to multi-layer view");
@@ -346,6 +350,7 @@ function handleLayerSwitch(layerName) {
       }
 
       const newKeymap = getKeymap();
+      const currentLayerName = getCurrentLayerName();
 
       // Rebuild keyboards with new layer
       const newKeyboards = rebuildKeyboards(
@@ -353,6 +358,7 @@ function handleLayerSwitch(layerName) {
         app.leftKeyboard,
         app.rightKeyboard,
         newKeymap,
+        currentLayerName,
       );
 
       // Update app references
@@ -381,18 +387,21 @@ function handleEditModeToggle() {
   const interactiveHelp = document.getElementById("interactive-help");
 
   const exportZmkBtn = document.getElementById("export-zmk-config");
+  const saveConfigBtn = document.getElementById("save-and-load-config");
 
   if (isActive) {
     toggleBtn.textContent = "Edit Mode: ON";
     toggleBtn.classList.add("active");
     exportBtn.style.display = "inline-block";
     exportZmkBtn.style.display = "inline-block";
+    saveConfigBtn.style.display = "inline-block";
     interactiveHelp.textContent = "✏️ Click any key in any layer to edit its label!";
   } else {
     toggleBtn.textContent = "Edit Mode: OFF";
     toggleBtn.classList.remove("active");
     exportBtn.style.display = "none";
     exportZmkBtn.style.display = "none";
+    saveConfigBtn.style.display = "none";
     interactiveHelp.textContent = "🖱️ Click modifier keys to see combinations!";
   }
 }
@@ -446,6 +455,35 @@ async function handleExportZMKConfig() {
 }
 
 /**
+ * Handle save and load config
+ */
+async function handleSaveAndLoadConfig() {
+  console.log("💾 Saving configuration to backend...");
+  const saveBtn = document.getElementById("save-and-load-config");
+  const originalText = saveBtn.textContent;
+
+  try {
+    saveBtn.textContent = "Saving...";
+    saveBtn.disabled = true;
+
+    await saveAndNotify();
+
+    saveBtn.textContent = "✅ Saved!";
+    setTimeout(() => {
+      saveBtn.textContent = originalText;
+      saveBtn.disabled = false;
+    }, 2000);
+  } catch (error) {
+    console.error("Save failed:", error);
+    saveBtn.textContent = "❌ Failed";
+    setTimeout(() => {
+      saveBtn.textContent = originalText;
+      saveBtn.disabled = false;
+    }, 2000);
+  }
+}
+
+/**
  * Setup UI control event listeners
  */
 function setupUIControls() {
@@ -461,6 +499,12 @@ function setupUIControls() {
   const editModeToggle = document.getElementById("edit-mode-toggle");
   if (editModeToggle) {
     editModeToggle.addEventListener("click", handleEditModeToggle);
+  }
+
+  // Save and load config button
+  const saveConfigBtn = document.getElementById("save-and-load-config");
+  if (saveConfigBtn) {
+    saveConfigBtn.addEventListener("click", handleSaveAndLoadConfig);
   }
 
   // Export keymap button
@@ -508,11 +552,13 @@ function rebuildAllKeyboards() {
   } else if (app.leftKeyboard && app.rightKeyboard) {
     // Rebuild single layer view
     const currentKeymap = getKeymap();
+    const currentLayerName = getCurrentLayerName();
     const newKeyboards = rebuildKeyboards(
       app.scene,
       app.leftKeyboard,
       app.rightKeyboard,
       currentKeymap,
+      currentLayerName,
     );
 
     app.leftKeyboard = newKeyboards.leftKeyboard;

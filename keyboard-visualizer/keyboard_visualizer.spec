@@ -1,5 +1,5 @@
 # Keyboard Visualizer - Technical Specification
-# Version: 1.4.0
+# Version: 1.6.0
 # Last Updated: December 2025
 # Project: ZMK Detun Keyboard 3D Visualizer
 
@@ -18,6 +18,7 @@
 - Auto-load from ZMK configuration files
 - Export modified keymaps as JSON
 - Export complete ZMK configuration as zip archive
+- Save keymap changes directly to backend file system for git workflow
 - Modifier key combinations display
 - Full 3D camera controls (rotate, pan, zoom)
 - Type-based color customization with settings panel and persistent storage
@@ -43,9 +44,11 @@
 - FR-016: Layer labels showing display name for each keyboard layer
 - FR-017: Export complete ZMK configuration as zip archive with all required files
 - FR-018: Type-based color customization through settings panel interface
-- FR-019: Persistent color preferences stored in browser localStorage
+- FR-019: Persistent color preferences stored in JSON file (key-colors.json) via backend API
 - FR-020: Reset colors to default functionality with Apply/Reset buttons
 - FR-021: Per-layer key editing - edit keys in any layer while in multi-layer view
+- FR-022: Save keymap changes to backend server for direct file system updates (enables git push workflow)
+- FR-023: Draggable color picker panel - user can reposition picker by dragging the header
 
 ### Non-Functional Requirements
 - NFR-001: Load and render within 3 seconds
@@ -66,7 +69,7 @@
 
 ### Runtime Environment
 - **Platform**: Web Browser (Client-side only)
-- **Server**: Static HTTP server (Python, Node.js, or PHP)
+- **Server**: Python HTTP server with POST endpoint support (start-server.py)
 - **Minimum Browser**: ES6 module support required
 
 ### External Dependencies
@@ -113,10 +116,10 @@
 └─────────────────────────────────────────────────────────────┘
                            ↓ HTTP Request
 ┌─────────────────────────────────────────────────────────────┐
-│                    Static HTTP Server                        │
-│  (Python http.server / Node.js serve / PHP built-in)        │
+│                    Python HTTP Server                        │
+│  (start-server.py with POST /api/save-keymap endpoint)      │
 └─────────────────────────────────────────────────────────────┘
-                           ↓ File Read
+                           ↓ File Read/Write
 ┌─────────────────────────────────────────────────────────────┐
 │                      File System                             │
 │  ../config/boards/shields/detun/detun.keymap (ZMK Config)   │
@@ -162,10 +165,14 @@
   - `getModifications()`: → Object
   - `exportKeymap()`: → Object
   - `resetModifications()`: → void
-  - `updateKeyColor(type, color)`: → boolean (updates keyColors for given type)
-  - `saveCustomColors()`: → boolean (saves current keyColors to localStorage)
-  - `resetColorsToDefault()`: → boolean (resets keyColors to defaultKeyColors)
-  - `getKeyColors()`: → Object (returns current keyColors)
+  - `updateKeyColor(layerName, row, col, color)`: → boolean (updates color for position)
+  - `getKeyColorAt(layerName, row, col)`: → number (gets color for position)
+  - `clearKeyColor(layerName, row, col)`: → boolean (clears custom color for position)
+  - `saveCustomColors()`: async → boolean (saves keyColors to JSON file via backend)
+  - `resetColorsToDefault()`: async → boolean (deletes JSON file via backend)
+  - `getKeyColors()`: → Object (returns current keyColors object)
+  - `getDefaultKeyColor()`: → number (returns default cream color)
+  - `colorsLoadedPromise`: Promise (resolves when colors loaded from backend)
   - `getDefaultKeyColors()`: → Object (returns defaultKeyColors)
   - `defaultKeymap`: Array<Array<string>>
   - `defaultKeyColors`: Object
@@ -174,12 +181,13 @@
   - `keyCombinations`: Object
 - **Imports**: zmk-parser.js
 - **Color Management**:
-  - Default colors defined in `defaultKeyColors` object (immutable)
-  - Current colors in `keyColors` object (mutable, starts as copy of defaults)
-  - Colors auto-loaded from localStorage on module initialization
-  - Supports real-time color updates with keyboard rebuild
-  - Type-based color assignment based on key label classification
-  - No per-key color storage - all keys colored by type
+  - Default color: `0xf5e6d3` (cream) for all keys
+  - Custom colors in `keyColors` object: `{ "row:col": hexColor }`
+  - Colors auto-loaded from backend JSON file on module initialization
+  - Supports real-time color updates with immediate mesh updates
+  - Position-based color storage (row:col format)
+  - Colors apply to same position across all layers
+  - Per-key customization via paint mode interface
 
 #### zmk-parser.js (ZMK File Parser)
 - **Purpose**: Parse ZMK .keymap files and convert to visualizer format
@@ -226,6 +234,31 @@
   - `config/boards/shields/detun/detun.keymap` - Main keymap (modified)
   - `build.yaml` - Build configuration
   - `config/west.yml` - West manifest
+
+#### zmk-saver.js (Backend Configuration Saver)
+- **Purpose**: Save keymap changes directly to backend file system
+- **Responsibilities**:
+  - Convert visualizer keymap format to ZMK keycode syntax
+  - Generate complete .keymap file content
+  - Create ZMK bindings for all layers with proper formatting
+  - Generate ASCII visual comments for keymaps
+  - Send POST request to backend server to save keymap file
+  - Provide user feedback on save success/failure
+  - Enable git workflow (user can commit and push after save)
+- **Exports**:
+  - `saveKeymapToBackend()`: async → {success: boolean, message: string, path?: string}
+  - `saveAndNotify()`: async → boolean (saves and shows user notification)
+- **Imports**: keymap-data.js
+- **Backend Endpoints**: 
+  - POST `/api/save-keymap` - Save keymap file
+  - GET `/api/key-colors` - Load color preferences
+  - POST `/api/key-colors` - Save color preferences
+  - DELETE `/api/key-colors` - Reset colors
+- **Workflow**:
+  1. User edits keys in visualizer
+  2. User clicks "Save and Load Config" button
+  3. Keymap is saved to `config/boards/shields/detun/detun.keymap`
+  4. User runs `git add . && git commit && git push` to trigger firmware build
   - `.github/workflows/build.yml` - GitHub Actions workflow
   - `README.md` - Export documentation
   - Additional shield configuration files (fetched from server)
@@ -384,51 +417,54 @@
   - Empty: ✕, ▽, NONE, TRANS, &trans, &none (dark gray)
   - Special: Everything else (light gray)
 
-#### color-customization.js (Color Customization Handler)
-- **Purpose**: Handle type-based color customization UI and persistence
+#### color-customization.js (Per-Key Color Customization Handler)
+- **Purpose**: Handle per-key color customization with paint mode UI and JSON file persistence
 - **Responsibilities**:
-  - Initialize color settings panel UI
-  - Handle color input changes for each key type
-  - Apply custom colors to keyboard by type
-  - Save color preferences to localStorage
-  - Load saved color preferences on init
+  - Initialize floating color picker UI with draggable interface
+  - Handle paint mode for per-key color selection
+  - Support multi-select with Shift+Click
+  - Apply custom colors to individual keys (across all layers)
+  - Save color preferences to JSON file via backend API
+  - Load saved color preferences from backend on init
   - Reset colors to defaults
-  - Update legend colors in real-time
+  - Provide visual feedback for selected keys
   - Trigger keyboard rebuild on color change
 - **Exports**:
   - `initColorCustomization(rebuildCallback)`: → void
-  - `hexToNumber(hexColor)`: → number
-  - `numberToHex(colorNumber)`: → string
-- **Imports**: keymap-data.js
+  - `isColorModeActive()`: → boolean
+- **Imports**: keymap-data.js, keyboard.js, interactions.js
 - **UI Elements**:
-  - Settings panel with color input fields for each key type
-  - Apply button to save and apply changes
-  - Reset button to restore defaults
-  - Close button (X) to dismiss panel
-  - Legend items showing current colors
-  - ESC key to close panel
-- **Color Types Supported**:
-  - letters: Letter keys (A-Z)
-  - numbers: Number keys (0-9)
-  - modifiers: Modifier keys (Ctrl, Shift, Alt, Tab, Caps, Esc)
-  - navigation: Navigation keys (arrows, space, enter, backspace, etc.)
-  - special: Special characters and symbols
-  - layerSwitch: Layer switching keys (L1, L2, etc.)
-  - empty: Empty/transparent keys (✕, ▽)
+  - "Paint Keys" button to toggle paint mode
+  - Floating draggable color picker panel with 8 preset colors
+  - Color swatches: Black, Cream, Sky Blue, Mint, Yellow, Pink, Lavender, Purple
+  - Reset to Default button in color picker
+  - Selected key count display
+  - Close button (X) to dismiss picker
+  - ESC key to close picker and exit paint mode
+  - "Reset All" button in legend to clear all custom colors
+- **Paint Mode Features**:
+  - Click keys to select them for coloring
+  - Shift+Click for multi-selection
+  - Visual highlight (orange glow) on selected keys
+  - Click color swatch to apply to all selected keys
+  - Color applies to same position across all layers
 - **Storage**:
-  - localStorage key: "keyColors"
-  - Format: JSON object with type names as keys, hex color numbers as values
-  - Auto-load on application start
-  - Persist across sessions
+  - Backend file: `keyboard-visualizer/key-colors.json`
+  - Format: JSON object with "row:col" keys and hex color integer values
+  - Auto-load via GET `/api/key-colors` on application start
+  - Auto-save via POST `/api/key-colors` when colors change
+  - Reset via DELETE `/api/key-colors`
+  - Persist across app restarts
+  - Excluded from version control
 - **Interaction Flow**:
-  1. User clicks "Customize Colors" button in legend panel
-  2. Settings panel opens with current colors loaded
-  3. User adjusts colors using HTML color inputs
-  4. User clicks "Apply Colors"
-  5. Colors saved to localStorage and applied to keyColors
-  6. Keyboard rebuilds with new colors
-  7. Legend updates to reflect new colors
-  8. Panel stays open for further edits or user closes it
+  1. User clicks "Paint Keys" button (enters paint mode)
+  2. User clicks key(s) to select (Shift+Click for multiple)
+  3. Floating color picker appears with preset colors
+  4. User clicks color swatch to apply to selected keys
+  5. Color saved to JSON file via backend API
+  6. Key meshes update immediately with new color
+  7. Color applies to same position across all layers
+  8. User exits paint mode or continues painting other keys
 
 #### styles.css (Visual Styling)
 - **Purpose**: All visual styling and UI elements
@@ -468,6 +504,39 @@ Array<Array<string>> [
   keys: Array<string>        // ZMK keycodes: ['&kp TAB', '&kp Q', ...]
 }
 ```
+
+### Key Colors Storage Format
+```javascript
+// key-colors.json
+// Position-based color mapping (row:col format)
+// Colors are stored as hex integers (e.g., 0x87ceeb for sky blue)
+// Applies to all layers at the same position
+{
+  "0:0": 0x2c2c2c,    // Row 0, Col 0 - Black
+  "0:1": 0xf5e6d3,    // Row 0, Col 1 - Cream (default)
+  "1:5": 0x87ceeb,    // Row 1, Col 5 - Sky Blue
+  "2:3": 0xf4e57e,    // Row 2, Col 3 - Yellow
+  "3:4": 0xf5a3b5     // Row 3, Col 4 - Pink
+}
+```
+
+**Storage Details**:
+- File location: `keyboard-visualizer/key-colors.json`
+- Format: JSON object with "row:col" keys and hex color integer values
+- Loaded on app initialization via GET `/api/key-colors`
+- Saved automatically when colors change via POST `/api/key-colors`
+- Can be deleted (reset) via DELETE `/api/key-colors`
+- Excluded from git via `.gitignore` (user-specific preferences)
+
+**Available Colors**:
+- `0x2c2c2c` - Black
+- `0xf5e6d3` - Cream (default)
+- `0x87ceeb` - Sky Blue
+- `0x7dd3c0` - Mint
+- `0xf4e57e` - Yellow
+- `0xf5a3b5` - Pink
+- `0xb8a7d9` - Lavender
+- `0x7e6db5` - Purple
 
 ### Key Combinations Format
 ```javascript
@@ -943,10 +1012,15 @@ style-src 'self' 'unsafe-inline';
 ## Deployment
 
 ### Hosting Requirements
-- Static file hosting
-- HTTP server (any)
+- Python HTTP server (start-server.py)
+- Write access to config directory for saving keymap changes
+- Write access to keyboard-visualizer directory for saving key colors
 - No database required
-- No server-side processing
+- Backend API endpoints:
+  - POST /api/save-keymap - Save keymap changes to detun.keymap
+  - GET /api/key-colors - Load key color preferences from key-colors.json
+  - POST /api/key-colors - Save key color preferences to key-colors.json
+  - DELETE /api/key-colors - Delete key-colors.json (reset to defaults)
 - CORS must allow module loading
 
 ### Deployment Steps
@@ -962,10 +1036,7 @@ cd keyboard-visualizer
 
 # Start server (choose one)
 ./start.sh                    # Auto-detect and run
-python3 start-server.py       # Python server
-python3 -m http.server 8000   # Manual Python
-npx serve                     # Node.js serve
-php -S localhost:8000         # PHP built-in
+python3 start-server.py       # Python server (REQUIRED for save functionality)
 
 # Access at http://localhost:8000
 ```

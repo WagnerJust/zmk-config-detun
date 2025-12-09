@@ -35,17 +35,20 @@ export const defaultKeyColor = 0xf5e6d3; // Cream colored (like nice PBT keycaps
 // Per-key color storage: { "layer:row:col": hexColor }
 export const keyColors = {};
 
-// Load custom colors from localStorage if available
-function loadCustomColors() {
+// Load custom colors from JSON file via backend
+async function loadCustomColors() {
   try {
-    const saved = localStorage.getItem("keyColors");
-    if (saved) {
-      const customColors = JSON.parse(saved);
+    const response = await fetch('/api/key-colors');
+    if (response.ok) {
+      const customColors = await response.json();
       // Clear and update in-place
       Object.keys(keyColors).forEach(key => delete keyColors[key]);
       Object.assign(keyColors, customColors);
-      console.log("✅ Loaded custom key colors from storage");
+      console.log("✅ Loaded custom key colors from file");
       return true;
+    } else if (response.status === 404) {
+      console.log("📝 No saved colors found, using defaults");
+      return false;
     }
   } catch (error) {
     console.warn("⚠️  Failed to load custom colors:", error);
@@ -53,8 +56,8 @@ function loadCustomColors() {
   return false;
 }
 
-// Initialize colors on module load
-loadCustomColors();
+// Initialize colors on module load (async)
+export const colorsLoadedPromise = loadCustomColors();
 
 // Key combinations data
 export const keyCombinations = {
@@ -352,10 +355,10 @@ export function resetModifications() {
  * @param {number} color - Hex color code
  */
 export function updateKeyColor(layerName, row, col, color) {
-  const key = `${layerName}:${row}:${col}`;
+  const key = `${row}:${col}`;
   keyColors[key] = color;
   console.log(
-    `🎨 Updated key [${layerName}:${row}:${col}] color to #${color.toString(16).padStart(6, "0")}`,
+    `🎨 Updated key [${row}:${col}] color to #${color.toString(16).padStart(6, "0")} (applies to all layers)`,
   );
   return true;
 }
@@ -368,7 +371,7 @@ export function updateKeyColor(layerName, row, col, color) {
  * @returns {number} - Hex color code
  */
 export function getKeyColorAt(layerName, row, col) {
-  const key = `${layerName}:${row}:${col}`;
+  const key = `${row}:${col}`;
   return keyColors[key] !== undefined ? keyColors[key] : defaultKeyColor;
 }
 
@@ -379,20 +382,33 @@ export function getKeyColorAt(layerName, row, col) {
  * @param {number} col - Column index
  */
 export function clearKeyColor(layerName, row, col) {
-  const key = `${layerName}:${row}:${col}`;
+  const key = `${row}:${col}`;
   delete keyColors[key];
-  console.log(`🎨 Cleared color for key [${layerName}:${row}:${col}]`);
+  console.log(`🎨 Cleared color for key [${row}:${col}] (applies to all layers)`);
   return true;
 }
 
 /**
- * Save current colors to localStorage
+ * Save current colors to JSON file via backend
  */
-export function saveCustomColors() {
+export async function saveCustomColors() {
   try {
-    localStorage.setItem("keyColors", JSON.stringify(keyColors));
-    console.log("💾 Saved custom key colors");
-    return true;
+    const response = await fetch('/api/key-colors', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(keyColors),
+    });
+    
+    if (response.ok) {
+      console.log("💾 Saved custom key colors to file");
+      return true;
+    } else {
+      const error = await response.text();
+      console.error("❌ Failed to save colors:", error);
+      return false;
+    }
   } catch (error) {
     console.error("❌ Failed to save colors:", error);
     return false;
@@ -402,13 +418,21 @@ export function saveCustomColors() {
 /**
  * Reset colors to default (clear all custom colors)
  */
-export function resetColorsToDefault() {
+export async function resetColorsToDefault() {
   // Clear all custom colors
   Object.keys(keyColors).forEach(key => delete keyColors[key]);
   try {
-    localStorage.removeItem("keyColors");
-    console.log("🔄 Reset colors to default");
-    return true;
+    const response = await fetch('/api/key-colors', {
+      method: 'DELETE',
+    });
+    
+    if (response.ok) {
+      console.log("🔄 Reset colors to default");
+      return true;
+    } else {
+      console.warn("⚠️  Failed to clear saved colors");
+      return false;
+    }
   } catch (error) {
     console.warn("⚠️  Failed to clear saved colors:", error);
     return false;

@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+"""
+Simple HTTP server launcher for the keyboard visualizer.
+This avoids CORS issues with file:// protocol.
+
+Usage:
+    python3 start-server.py
+    or
+    ./start-server.py (if executable)
+
+Then open: http://localhost:8000
+"""
+
+import http.server
+import json
+import os
+import socketserver
+import sys
+import webbrowser
+from pathlib import Path
+
+# Configuration
+PORT = 8000
+DIRECTORY = Path(__file__).parent
+
+
+class Handler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=str(DIRECTORY), **kwargs)
+
+    def end_headers(self):
+        # Enable CORS
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        """Handle CORS preflight requests"""
+        self.send_response(200)
+        self.end_headers()
+
+    def do_POST(self):
+        """Handle POST requests for saving keymap"""
+        if self.path == "/api/save-keymap":
+            try:
+                # Read request body
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+
+                # Validate request
+                if 'keymap_content' not in data:
+                    self.send_error(400, "Missing keymap_content in request")
+                    return
+
+                # Determine the keymap file path
+                # Go up one level from keyboard-visualizer to project root
+                project_root = DIRECTORY.parent
+                keymap_path = project_root / "config" / "boards" / "shields" / "detun" / "detun.keymap"
+
+                # Ensure directory exists
+                keymap_path.parent.mkdir(parents=True, exist_ok=True)
+
+                # Write the keymap file
+                with open(keymap_path, 'w', encoding='utf-8') as f:
+                    f.write(data['keymap_content'])
+
+                # Send success response
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                response = {
+                    'success': True,
+                    'message': 'Keymap saved successfully',
+                    'path': str(keymap_path)
+                }
+                self.wfile.write(json.dumps(response).encode('utf-8'))
+
+                print(f"✅ Saved keymap to: {keymap_path}")
+
+            except Exception as e:
+                self.send_error(500, f"Error saving keymap: {str(e)}")
+                print(f"❌ Error saving keymap: {e}")
+        else:
+            self.send_error(404, "Endpoint not found")
+
+    def log_message(self, format, *args):
+        # Custom log format
+        print(f"[{self.log_date_time_string()}] {format % args}")
+
+
+def find_free_port(start_port=8000, max_attempts=10):
+    """Find a free port starting from start_port"""
+    for port in range(start_port, start_port + max_attempts):
+        try:
+            with socketserver.TCPServer(("", port), None) as s:
+                return port
+        except OSError:
+            continue
+    return None
+
+
+def main():
+    # Change to script directory
+    os.chdir(DIRECTORY)
+
+    # Find a free port
+    port = find_free_port(PORT)
+    if port is None:
+        print(f"❌ Could not find a free port between {PORT} and {PORT + 10}")
+        sys.exit(1)
+
+    # Create server
+    with socketserver.TCPServer(("", port), Handler) as httpd:
+        url = f"http://localhost:{port}"
+
+        print("=" * 60)
+        print("🎹 Detun Keyboard Visualizer Server")
+        print("=" * 60)
+        print(f"✅ Server running at: {url}")
+        print(f"📁 Serving directory: {DIRECTORY}")
+        print()
+        print("🌐 Opening browser automatically...")
+        print()
+        print("Press Ctrl+C to stop the server")
+        print("=" * 60)
+
+        # Open browser
+        try:
+            webbrowser.open(url)
+        except Exception as e:
+            print(f"⚠️  Could not open browser automatically: {e}")
+            print(f"   Please open {url} manually")
+
+        # Serve forever
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            print("\n\n👋 Shutting down server...")
+            print("Goodbye!")
+
+
+if __name__ == "__main__":
+    main()

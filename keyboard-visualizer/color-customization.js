@@ -48,9 +48,9 @@ function createColorPicker() {
   colorPickerElement.id = "key-color-picker";
   colorPickerElement.className = "key-color-picker";
   colorPickerElement.innerHTML = `
-    <div class="color-picker-header">
+    <div class="color-picker-header" style="cursor: move;">
       <span class="color-picker-title">Key Color</span>
-      <button class="color-picker-close">×</button>
+      <button type="button" class="color-picker-close">×</button>
     </div>
     <div class="color-picker-body">
       <div class="color-palette">
@@ -76,9 +76,20 @@ function createColorPicker() {
   colorPickerElement.style.display = "none";
   document.body.appendChild(colorPickerElement);
 
+  // Make draggable
+  makeDraggable(colorPickerElement);
+
   // Close button
   const closeBtn = colorPickerElement.querySelector(".color-picker-close");
-  closeBtn.addEventListener("click", hideColorPicker);
+  if (closeBtn) {
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      hideColorPicker();
+    });
+  } else {
+    console.error("❌ Color picker close button not found!");
+  }
 
   // Color option buttons
   const colorOptions = colorPickerElement.querySelectorAll(".color-option");
@@ -99,6 +110,68 @@ function createColorPicker() {
       hideColorPicker();
     }
   });
+}
+
+/**
+ * Make an element draggable by its header
+ * @param {HTMLElement} element - The element to make draggable
+ */
+function makeDraggable(element) {
+  const header = element.querySelector(".color-picker-header");
+  if (!header) return;
+
+  let isDragging = false;
+  let currentX;
+  let currentY;
+  let initialX;
+  let initialY;
+
+  header.addEventListener("mousedown", dragStart);
+  document.addEventListener("mousemove", drag);
+  document.addEventListener("mouseup", dragEnd);
+
+  function dragStart(e) {
+    // Don't drag if clicking the close button
+    if (e.target.classList.contains("color-picker-close")) {
+      return;
+    }
+
+    // Get initial position
+    const rect = element.getBoundingClientRect();
+    initialX = e.clientX - rect.left;
+    initialY = e.clientY - rect.top;
+
+    isDragging = true;
+    element.style.cursor = "move";
+  }
+
+  function drag(e) {
+    if (!isDragging) return;
+
+    e.preventDefault();
+
+    // Calculate new position
+    currentX = e.clientX - initialX;
+    currentY = e.clientY - initialY;
+
+    // Keep within viewport bounds
+    const elementRect = element.getBoundingClientRect();
+    const maxX = window.innerWidth - elementRect.width;
+    const maxY = window.innerHeight - elementRect.height;
+
+    currentX = Math.max(0, Math.min(currentX, maxX));
+    currentY = Math.max(0, Math.min(currentY, maxY));
+
+    // Remove transform and use absolute positioning
+    element.style.transform = "none";
+    element.style.left = currentX + "px";
+    element.style.top = currentY + "px";
+  }
+
+  function dragEnd() {
+    isDragging = false;
+    element.style.cursor = "";
+  }
 }
 
 /**
@@ -311,6 +384,14 @@ function showColorPickerForSelection() {
     });
   }
   
+  // Only reset position to center if picker is currently hidden
+  const isCurrentlyHidden = colorPickerElement.style.display === "none";
+  if (isCurrentlyHidden) {
+    colorPickerElement.style.transform = "translate(-50%, -50%)";
+    colorPickerElement.style.left = "50%";
+    colorPickerElement.style.top = "50%";
+  }
+  
   colorPickerElement.style.display = "block";
 }
 
@@ -318,7 +399,10 @@ function showColorPickerForSelection() {
  * Hide color picker
  */
 function hideColorPicker() {
-  colorPickerElement.style.display = "none";
+  if (colorPickerElement) {
+    colorPickerElement.style.display = "none";
+    clearSelection();
+  }
 }
 
 /**
@@ -328,80 +412,91 @@ function hideColorPicker() {
 function applyColorToSelectedKeys(hexColor) {
   const colorValue = parseInt(hexColor.substring(1), 16);
   
+  // Collect unique positions (row:col) from selected keys
+  const positions = new Set();
   selectedKeys.forEach(keyId => {
     const [layerName, row, col] = keyId.split(":");
-    updateKeyColor(layerName, parseInt(row), parseInt(col), colorValue);
-    
-    // Update the visual immediately
-    const keyObj = keyObjects.find(
-      ko => ko.layerName === layerName && 
-            ko.row === parseInt(row) && 
-            ko.col === parseInt(col)
-    );
-    
-    if (keyObj && keyObj.mesh) {
-      keyObj.mesh.material.color.setHex(colorValue);
-      keyObj.mesh.material.needsUpdate = true;
-      keyObj.mesh.userData.originalColor = colorValue;
-      
-      // Force material refresh
-      if (keyObj.mesh.material.emissive) {
-        keyObj.mesh.material.emissive.setHex(0x000000);
-        keyObj.mesh.material.emissiveIntensity = 0;
-      }
-    }
+    positions.add(`${row}:${col}`);
   });
   
-  // Save colors to localStorage
-  saveCustomColors();
+  // Apply color to all keys at these positions across ALL layers
+  positions.forEach(position => {
+    const [row, col] = position.split(":");
+    updateKeyColor(null, parseInt(row), parseInt(col), colorValue);
+    
+    // Update ALL key meshes at this position in ALL layers
+    keyObjects.forEach(keyObj => {
+      if (keyObj.row === parseInt(row) && keyObj.col === parseInt(col)) {
+        if (keyObj.mesh) {
+          keyObj.mesh.material.color.setHex(colorValue);
+          keyObj.mesh.material.needsUpdate = true;
+          keyObj.mesh.userData.originalColor = colorValue;
+          
+          // Force material refresh
+          if (keyObj.mesh.material.emissive) {
+            keyObj.mesh.material.emissive.setHex(0x000000);
+            keyObj.mesh.material.emissiveIntensity = 0;
+          }
+        }
+      }
+    });
+  });
   
-  console.log(`🎨 Applied color ${hexColor} to ${selectedKeys.size} keys`);
+  // Save colors to file
+  saveCustomColors().catch(error => {
+    console.error("Failed to save colors:", error);
+  });
+  
+  console.log(`🎨 Applied color ${hexColor} to ${positions.size} positions across all layers`);
 }
 
 /**
  * Clear color from selected keys (reset to default)
  */
-function clearColorFromSelectedKeys() {
+async function clearColorFromSelectedKeys() {
   const defaultColor = getDefaultKeyColor();
   
+  // Collect unique positions (row:col) from selected keys
+  const positions = new Set();
   selectedKeys.forEach(keyId => {
     const [layerName, row, col] = keyId.split(":");
-    clearKeyColor(layerName, parseInt(row), parseInt(col));
-    
-    // Update the visual immediately
-    const keyObj = keyObjects.find(
-      ko => ko.layerName === layerName && 
-            ko.row === parseInt(row) && 
-            ko.col === parseInt(col)
-    );
-    
-    if (keyObj && keyObj.mesh) {
-      keyObj.mesh.material.color.setHex(defaultColor);
-      keyObj.mesh.material.needsUpdate = true;
-      keyObj.mesh.userData.originalColor = defaultColor;
-      
-      // Force material refresh
-      if (keyObj.mesh.material.emissive) {
-        keyObj.mesh.material.emissive.setHex(0x000000);
-        keyObj.mesh.material.emissiveIntensity = 0;
-      }
-    }
+    positions.add(`${row}:${col}`);
   });
   
-  // Save colors to localStorage
-  saveCustomColors();
+  // Clear color for all keys at these positions across ALL layers
+  positions.forEach(position => {
+    const [row, col] = position.split(":");
+    clearKeyColor(null, parseInt(row), parseInt(col));
+    
+    // Update ALL key meshes at this position in ALL layers
+    keyObjects.forEach(keyObj => {
+      if (keyObj.row === parseInt(row) && keyObj.col === parseInt(col)) {
+        if (keyObj.mesh) {
+          keyObj.mesh.material.color.setHex(defaultColor);
+          keyObj.mesh.material.needsUpdate = true;
+          keyObj.mesh.userData.originalColor = defaultColor;
+          
+          // Force material refresh
+          if (keyObj.mesh.material.emissive) {
+            keyObj.mesh.material.emissive.setHex(0x000000);
+            keyObj.mesh.material.emissiveIntensity = 0;
+          }
+        }
+      }
+    });
+  });
   
-  // Show feedback
-  const clearBtn = document.getElementById("clear-key-color");
-  const originalText = clearBtn.textContent;
-  clearBtn.textContent = "✓ Reset!";
-  clearBtn.style.background = "#4caf50";
-  setTimeout(() => {
-    clearBtn.textContent = originalText;
-    clearBtn.style.background = "";
-  }, 1000);
+  // Save colors to file
+  try {
+    await saveCustomColors();
+    console.log(`🎨 Reset ${positions.size} positions to default color across all layers`);
+  } catch (error) {
+    console.error("Failed to save colors:", error);
+  }
   
-  console.log(`🎨 Reset color for ${selectedKeys.size} keys`);
+  // Clear selection after applying
+  clearSelection();
+  hideColorPicker();
 }
 
 /**
@@ -421,23 +516,33 @@ function addResetColorButton(rebuildCallback) {
   resetBtn.style.marginTop = "10px";
   resetBtn.style.width = "100%";
   
-  resetBtn.addEventListener("click", () => {
+  resetBtn.addEventListener("click", async () => {
     if (confirm("Reset all key colors to default? This cannot be undone.")) {
-      resetColorsToDefault();
-      
-      if (rebuildCallback) {
-        rebuildCallback();
+      try {
+        await resetColorsToDefault();
+        
+        if (rebuildCallback) {
+          rebuildCallback();
+        }
+        
+        console.log("🔄 Reset all key colors");
+        
+        // Show feedback
+        resetBtn.textContent = "✓ Reset!";
+        resetBtn.style.background = "#4caf50";
+        setTimeout(() => {
+          resetBtn.textContent = "Reset All";
+          resetBtn.style.background = "";
+        }, 1500);
+      } catch (error) {
+        console.error("Failed to reset colors:", error);
+        resetBtn.textContent = "✗ Failed";
+        resetBtn.style.background = "#f44336";
+        setTimeout(() => {
+          resetBtn.textContent = "Reset All";
+          resetBtn.style.background = "";
+        }, 1500);
       }
-      
-      console.log("🔄 Reset all key colors");
-      
-      // Show feedback
-      resetBtn.textContent = "✓ Reset!";
-      resetBtn.style.background = "#4caf50";
-      setTimeout(() => {
-        resetBtn.textContent = "Reset All";
-        resetBtn.style.background = "";
-      }, 1500);
     }
   });
   

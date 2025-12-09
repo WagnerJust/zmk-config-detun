@@ -142,18 +142,21 @@ export function createKeyboard(keymap, offsetX, side = "left", layerName = null)
 /**
  * Create both left and right keyboards
  * @param {Array} keymap - 2D array of key labels
+ * @param {string} layerName - Layer name this keyboard belongs to (optional)
  * @returns {Object} - Object containing left and right keyboard groups
  */
-export function createKeyboards(keymap) {
+export function createKeyboards(keymap, layerName = null) {
   const leftKeyboard = createKeyboard(
     keymap,
     KEYBOARD_CONFIG.leftOffset,
     "left",
+    layerName,
   );
   const rightKeyboard = createKeyboard(
     keymap,
     KEYBOARD_CONFIG.rightOffset,
     "right",
+    layerName,
   );
 
   return { leftKeyboard, rightKeyboard };
@@ -405,6 +408,7 @@ export function rebuildKeyboards(
   leftKeyboard,
   rightKeyboard,
   newKeymap,
+  layerName = null,
 ) {
   // Remove old keyboards from scene
   scene.remove(leftKeyboard);
@@ -430,7 +434,7 @@ export function rebuildKeyboards(
   keyObjects.length = 0;
 
   // Create new keyboards
-  const newKeyboards = createKeyboards(newKeymap);
+  const newKeyboards = createKeyboards(newKeymap, layerName);
 
   // Add to scene
   scene.add(newKeyboards.leftKeyboard);

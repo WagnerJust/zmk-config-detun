@@ -113,6 +113,17 @@ body {
     transform: translateY(0);
 }
 
+.btn-primary {
+    background: #4caf50;
+    border-color: #4caf50;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: #45a049;
+    border-color: #45a049;
+}
+
 .btn-secondary {
     background: #ce93d8;
     border-color: #ce93d8;
@@ -256,6 +267,7 @@ body {
     z-index: 300;
     min-width: 280px;
     backdrop-filter: blur(10px);
+    will-change: transform, left, top;
 }
 
 .color-picker-header {
@@ -265,12 +277,18 @@ body {
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .color-picker-title {
     font-size: 16px;
     font-weight: 600;
     color: #2c2c2c;
+    cursor: move;
+    flex-grow: 1;
 }
 
 .color-picker-close {
@@ -288,6 +306,9 @@ body {
     transition: background 0.2s;
     padding: 0;
     line-height: 1;
+    pointer-events: auto;
+    z-index: 10;
+    position: relative;
 }
 
 .color-picker-close:hover {
