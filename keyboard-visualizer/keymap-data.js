@@ -29,15 +29,15 @@ export let currentLayerName = "default";
 export let keymapModifications = {};
 export let hasModifications = false;
 
-// Default key color mapping
+// Default key color mapping - cream alphabet, pink layers, blue modifiers
 export const defaultKeyColors = {
-  letters: 0x4caf50, // Green
-  numbers: 0x2196f3, // Blue
-  modifiers: 0xff9800, // Orange
-  navigation: 0xf44336, // Red
-  special: 0x9c27b0, // Purple
-  layerSwitch: 0x00bcd4, // Cyan
-  empty: 0x424242, // Dark gray
+  letters: 0xf5e6d3, // Cream colored (like nice PBT keycaps)
+  numbers: 0xf5e6d3, // Cream colored
+  modifiers: 0x64b5f6, // Blue for actions/modifiers
+  navigation: 0x64b5f6, // Blue for navigation
+  special: 0xe0e0e0, // Light gray for special chars
+  layerSwitch: 0xf48fb1, // Pink for layer switching
+  empty: 0x6e6e6e, // Dark gray for empty keys
 };
 
 // Current key colors (can be customized)

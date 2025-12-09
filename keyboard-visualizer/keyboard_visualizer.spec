@@ -1,5 +1,5 @@
 # Keyboard Visualizer - Technical Specification
-# Version: 1.3.0
+# Version: 1.5.0
 # Last Updated: December 2024
 # Project: ZMK Detun Keyboard 3D Visualizer
 
@@ -11,7 +11,11 @@
 **License**: MIT
 
 **Key Features**:
-- Multi-layer simultaneous view (all 3 layers stacked vertically)
+- Minimalist bright workspace aesthetic inspired by modern office setups
+- Clean white desk with realistic accessories (laptop, plant, coffee mug, pen holder, notebook, mouse)
+- Large bright window with natural daylight streaming in
+- Bright, airy environment with clean white/light gray color palette
+- Multi-layer simultaneous view (all 3 layers stacked vertically on desk)
 - Interactive key editing with visual modification tracking (works in all views)
 - Per-layer key editing - edit keys in any layer independently
 - Real-time layer switching between single and multi-layer views
@@ -21,6 +25,7 @@
 - Modifier key combinations display
 - Full 3D camera controls (rotate, pan, zoom)
 - Customizable key colors with persistent storage
+- Clean, minimal keycap colors for professional appearance
 
 ## Core Requirements
 
@@ -46,6 +51,11 @@
 - FR-019: Persistent color preferences stored in browser localStorage
 - FR-020: Reset colors to default functionality
 - FR-021: Per-layer key editing - edit keys in any layer while in multi-layer view
+- FR-022: Minimalist bright workspace environment with clean aesthetic
+- FR-023: Bright natural daylight simulation from large window
+- FR-024: Clean white desk with realistic desk accessories
+- FR-025: Minimal color palette with light gray/white keycaps
+- FR-026: Professional office setup with laptop, plants, and desk items
 
 ### Non-Functional Requirements
 - NFR-001: Load and render within 3 seconds

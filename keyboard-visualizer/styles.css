@@ -6,7 +6,7 @@
 
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f5f5f5;
     overflow: hidden;
 }
 
@@ -20,73 +20,78 @@ body {
     position: absolute;
     top: 20px;
     left: 20px;
-    color: white;
-    background: rgba(0, 0, 0, 0.6);
+    color: #2c2c2c;
+    background: rgba(255, 255, 255, 0.95);
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     max-width: 300px;
     z-index: 100;
     backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 #info h1 {
     font-size: 24px;
     margin-bottom: 10px;
+    color: #2c2c2c;
 }
 
 #info p {
     font-size: 14px;
     line-height: 1.6;
     margin-bottom: 8px;
+    color: #4a4a4a;
 }
 
 #info .layer-view-note {
-    background: rgba(255, 152, 0, 0.2);
-    border-left: 3px solid #ff9800;
+    background: rgba(255, 167, 38, 0.1);
+    border-left: 3px solid #ffa726;
     padding: 8px;
     margin: 10px 0;
     border-radius: 4px;
     font-size: 12px;
+    color: #4a4a4a;
 }
 
 .controls-section {
     margin: 15px 0;
     padding: 10px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .controls-section label {
     display: block;
     font-size: 12px;
     margin-bottom: 5px;
-    color: rgba(255, 255, 255, 0.8);
+    color: #666;
 }
 
 #layer-select {
     width: 100%;
     padding: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: white;
+    border: 1px solid #d4d4d4;
     border-radius: 5px;
-    color: white;
+    color: #2c2c2c;
     font-size: 14px;
     cursor: pointer;
     outline: none;
 }
 
 #layer-select:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: #f8f8f8;
+    border-color: #bbb;
 }
 
 #layer-select option {
-    background: #1a1a2e;
-    color: white;
+    background: white;
+    color: #2c2c2c;
 }
 
 .btn {
     padding: 8px 16px;
-    background: rgba(76, 175, 80, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #90caf9;
+    border: 1px solid #90caf9;
     border-radius: 5px;
     color: white;
     font-size: 13px;
@@ -94,11 +99,14 @@ body {
     transition: all 0.2s;
     margin-right: 5px;
     outline: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn:hover {
-    background: rgba(76, 175, 80, 1);
+    background: #64b5f6;
+    border-color: #64b5f6;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn:active {
@@ -106,32 +114,37 @@ body {
 }
 
 .btn-secondary {
-    background: rgba(33, 150, 243, 0.8);
+    background: #ce93d8;
+    border-color: #ce93d8;
 }
 
 .btn-secondary:hover {
-    background: rgba(33, 150, 243, 1);
+    background: #ba68c8;
+    border-color: #ba68c8;
 }
 
 #edit-mode-toggle.active {
-    background: rgba(255, 152, 0, 0.8);
+    background: #ffa726;
+    border-color: #ffa726;
 }
 
 #edit-mode-toggle.active:hover {
-    background: rgba(255, 152, 0, 1);
+    background: #ff9800;
+    border-color: #ff9800;
 }
 
 .legend {
     position: absolute;
     bottom: 20px;
     right: 20px;
-    color: white;
-    background: rgba(0, 0, 0, 0.6);
+    color: #2c2c2c;
+    background: rgba(255, 255, 255, 0.95);
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 12px;
     z-index: 100;
     backdrop-filter: blur(10px);
     max-width: 200px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .legend-header {
@@ -145,13 +158,13 @@ body {
 
 .legend-header strong {
     font-size: 14px;
-    color: white;
+    color: #2c2c2c;
 }
 
 .btn-customize {
     padding: 4px 10px;
-    background: rgba(76, 175, 80, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #90caf9;
+    border: 1px solid #90caf9;
     border-radius: 4px;
     color: white;
     font-size: 11px;
@@ -159,11 +172,14 @@ body {
     transition: all 0.2s;
     outline: none;
     white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-customize:hover {
-    background: rgba(76, 175, 80, 0.9);
+    background: #64b5f6;
+    border-color: #64b5f6;
     transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-customize:active {
@@ -175,6 +191,7 @@ body {
     align-items: center;
     margin: 5px 0;
     font-size: 12px;
+    color: #4a4a4a;
 }
 
 .legend-color {
@@ -182,7 +199,7 @@ body {
     height: 20px;
     margin-right: 10px;
     border-radius: 3px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 #canvas {
@@ -203,17 +220,18 @@ body {
     position: absolute;
     top: 20px;
     right: 20px;
-    color: white;
-    background: rgba(0, 0, 0, 0.7);
+    color: #2c2c2c;
+    background: rgba(255, 255, 255, 0.95);
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     max-width: 350px;
     max-height: 80vh;
     overflow-y: auto;
     z-index: 100;
     backdrop-filter: blur(10px);
     display: none;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 #combinations-panel.active {
@@ -235,8 +253,8 @@ body {
 #combinations-panel h2 {
     font-size: 18px;
     margin-bottom: 15px;
-    color: #ff9800;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    color: #ffa726;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     padding-bottom: 10px;
 }
 
@@ -244,9 +262,9 @@ body {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
     border: none;
-    color: white;
+    color: #666;
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -259,33 +277,34 @@ body {
 }
 
 #combinations-panel .close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.1);
+    color: #2c2c2c;
 }
 
 .combination-item {
     margin: 10px 0;
     padding: 10px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.02);
     border-radius: 5px;
-    border-left: 3px solid #4caf50;
+    border-left: 3px solid #90caf9;
 }
 
 .combination-keys {
     font-weight: bold;
-    color: #4caf50;
+    color: #90caf9;
     margin-bottom: 5px;
     font-family: "Courier New", monospace;
 }
 
 .combination-description {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
+    color: #666;
 }
 
 #combinations-list:empty::before {
     content: "Click on a modifier key (Ctrl, Shift, Alt, GUI) to see available combinations";
     font-style: italic;
-    color: rgba(255, 255, 255, 0.6);
+    color: #999;
     font-size: 14px;
 }
 
@@ -295,17 +314,17 @@ body {
 }
 
 #combinations-panel::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
     border-radius: 4px;
 }
 
 #combinations-panel::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 4px;
 }
 
 #combinations-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.3);
 }
 
 #edit-panel {
@@ -313,17 +332,17 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: white;
-    background: rgba(0, 0, 0, 0.9);
+    color: #2c2c2c;
+    background: rgba(255, 255, 255, 0.98);
     padding: 25px;
-    border-radius: 10px;
+    border-radius: 12px;
     width: 400px;
     max-width: 90vw;
     z-index: 200;
     backdrop-filter: blur(10px);
     display: none;
-    border: 2px solid rgba(255, 152, 0, 0.5);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 #edit-panel.active {
@@ -345,8 +364,8 @@ body {
 #edit-panel h2 {
     font-size: 20px;
     margin-bottom: 20px;
-    color: #ff9800;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    color: #ffa726;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     padding-bottom: 10px;
 }
 
@@ -354,9 +373,9 @@ body {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
     border: none;
-    color: white;
+    color: #666;
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -369,7 +388,8 @@ body {
 }
 
 #edit-panel .close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.1);
+    color: #2c2c2c;
 }
 
 .edit-content {
@@ -386,23 +406,23 @@ body {
 
 .edit-field label {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: #666;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 #edit-position {
     font-family: "Courier New", monospace;
-    color: #4caf50;
+    color: #90caf9;
     font-size: 14px;
 }
 
 #edit-label {
     padding: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: white;
+    border: 1px solid #d4d4d4;
     border-radius: 5px;
-    color: white;
+    color: #2c2c2c;
     font-size: 16px;
     font-family: "Courier New", monospace;
     outline: none;
@@ -410,9 +430,9 @@ body {
 }
 
 #edit-label:focus {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: #ff9800;
-    box-shadow: 0 0 10px rgba(255, 152, 0, 0.3);
+    background: white;
+    border-color: #ffa726;
+    box-shadow: 0 0 10px rgba(255, 167, 38, 0.2);
 }
 
 .quick-keys {
@@ -423,10 +443,10 @@ body {
 
 .quick-key {
     padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: white;
+    border: 1px solid #d4d4d4;
     border-radius: 4px;
-    color: white;
+    color: #2c2c2c;
     font-size: 11px;
     cursor: pointer;
     transition: all 0.2s;
@@ -434,7 +454,8 @@ body {
 }
 
 .quick-key:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: #f0f0f0;
+    border-color: #bbb;
     transform: translateY(-1px);
 }
 
@@ -462,17 +483,17 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: white;
-    background: rgba(0, 0, 0, 0.9);
+    color: #2c2c2c;
+    background: rgba(255, 255, 255, 0.98);
     padding: 25px;
-    border-radius: 10px;
+    border-radius: 12px;
     width: 400px;
     max-width: 90vw;
     z-index: 200;
     backdrop-filter: blur(10px);
     display: none;
-    border: 2px solid rgba(76, 175, 80, 0.5);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 #color-settings-panel.active {

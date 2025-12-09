@@ -1,14 +1,18 @@
 # Detun Keyboard 3D Visualizer
 
-A beautiful, interactive 3D web-based visualizer for your Detun 60-key split keyboard layout.
+A beautiful, interactive 3D web-based visualizer for your Detun 60-key split keyboard layout in a realistic modern office environment.
 
 ## ✨ Features
 
-- **3D Visualization**: See your keyboard layout in an interactive 3D space
-- **Split Layout**: Left and right keyboards positioned separately (30 keys each)
-- **Color-Coded Keys**: Different colors for letters, numbers, modifiers, special characters, and navigation keys
+- **Realistic 3D Environment**: Beautiful modern office space with wooden desk, walls, floor, window, and natural lighting
+- **Immersive Scene**: Keyboards naturally positioned on desk mat with decorative items (coffee mug, plant, monitor stand)
+- **3D Visualization**: See your keyboard layout in an interactive 3D space with realistic materials and shadows
+- **Split Layout**: Left and right keyboards positioned separately on desk (30 keys each)
+- **Soft Color Palette**: Realistic keycap colors with softer tones for improved visual appeal
 - **Layer Switching**: Switch between different keyboard layers (Default, Lower, Raise, etc.)
-- **Edit Mode**: Click any key to edit its label interactively
+- **Multi-Layer View**: Display all keyboard layers stacked vertically on the desk
+- **Per-Layer Editing**: Edit keys in any layer, even when viewing all layers at once
+- **Edit Mode**: Click any key in any layer to edit its label interactively
 - **Modification Tracking**: Visual indication of modified keys with orange glow
 - **Export Functionality**: Export modified keymaps as JSON files
 - **Interactive Combinations**: Click on modifier keys (Ctrl, Shift, Alt, GUI) to see available key combinations
@@ -140,11 +144,12 @@ When a modifier is selected:
 
 ## 🎨 Color Legend
 
-- **🟢 Green**: Letter keys (A-Z)
-- **🔵 Blue**: Number keys (0-9)
-- **🟠 Orange**: Modifier keys (Ctrl, Shift, Alt, GUI, Tab, Caps, Esc)
-- **🟣 Purple**: Special characters (;, ', -, =, [, ], \, etc.)
-- **🔴 Red**: Navigation keys (Space, Enter, Backspace)
+- **Light Gray**: Letter keys (A-Z) - realistic keycap color
+- **Soft Gray**: Number keys (0-9)
+- **Warm Orange**: Modifier keys (Ctrl, Shift, Alt, GUI, Tab, Caps, Esc)
+- **Soft Purple**: Special characters (;, ', -, =, [, ], \, etc.)
+- **Soft Blue**: Navigation keys (Space, Enter, Backspace)
+- **Soft Cyan**: Layer switch keys (L1, L2, etc.)
 
 ## 📐 Layout
 
@@ -241,6 +246,33 @@ export function getKeyColor(keyLabel) {
     // ... etc
 }
 ```
+
+## 🎨 Visual Design
+
+### Environment
+The visualizer creates a realistic modern office/workspace:
+- **Wooden Desk**: Rich walnut-colored desk with four legs
+- **Desk Mat**: Dark gray mouse pad/desk mat under keyboards
+- **Floor**: Warm wood flooring
+- **Walls**: Clean white/light gray walls with window
+- **Window**: Frosted glass window with sunlight streaming through
+- **Decorations**: Coffee mug, small potted plant, and monitor stand for realism
+
+### Lighting
+Multi-source lighting creates natural ambiance:
+- **Sunlight**: Warm directional light from window
+- **Ambient Light**: Soft overall illumination
+- **Fill Light**: Cool-toned secondary lighting
+- **Desk Lamp**: Warm point light accent
+- **Hemisphere Light**: Natural sky/ground color gradient
+
+### Materials
+Realistic material properties throughout:
+- **Keys**: Matte plastic with subtle reflections
+- **Desk**: Polished wood with low metalness
+- **Walls**: Matte paint finish
+- **Floor**: Natural wood texture
+- **Decorative Items**: Varied materials (ceramic, metal, plant matter)
 
 ## 🏗️ Architecture
 
@@ -349,6 +381,10 @@ Completed features:
 - [x] Load keymap from ZMK .keymap file directly
 - [x] Interactive key editing
 - [x] Export keyboard layout as JSON
+- [x] Multi-layer simultaneous view
+- [x] Per-layer editing capability
+- [x] Realistic 3D environment with modern office aesthetic
+- [x] Natural lighting and materials
 
 Potential features to add:
 - [ ] Import keymap from JSON
@@ -383,18 +419,30 @@ This visualizer is part of your ZMK keyboard configuration. Feel free to modify 
 - If ZMK config can't be loaded, it falls back to a default layout
 
 ### View Mode Tips
+- **Camera Controls**: Left-click drag to rotate, right-click drag to pan, scroll to zoom
+- **Layer Switching**: Use the dropdown to switch between single layers or view all layers stacked
 - Click on **Ctrl** to see common shortcuts you can use with your keyboard
 - Try clicking **Shift** to see what symbols each key produces
 - The **GUI** key shows system-level shortcuts (⊞ Win key on Windows, ⌘ Cmd on Mac)
 - **Alt** combinations show menu and window management shortcuts
 
 ### Edit Mode Tips
-- Use the layer dropdown before editing to modify specific layers
+- **Works in all views**: Edit keys in single-layer OR multi-layer view
+- **Layer awareness**: The edit panel shows which layer you're editing
+- Click any key in any layer to open the edit panel
 - Modified keys glow orange so you can track your changes
 - Quick key buttons speed up common edits (CTRL, SHFT, SPC, etc.)
 - Press Enter to quickly save while typing in the label field
+- Press Escape to cancel editing
 - Export your changes before refreshing to avoid losing modifications
 - Labels can be up to 10 characters long
+
+### Visual Experience Tips
+- **Realistic lighting**: Notice the warm sunlight from the window and cool ambient light
+- **Subtle animations**: Keyboards have a gentle floating/breathing effect
+- **Shadows**: Realistic shadows cast by keyboards and decorative items
+- **Depth**: Use camera controls to explore the scene from different angles
+- **Focus on details**: Check out the coffee mug, plant, and other desk items
 
 ---
 

@@ -6,14 +6,15 @@ import { getKeyColor, createTextTexture } from "./utils.js";
  * Keyboard configuration constants
  */
 export const KEYBOARD_CONFIG = {
-  keyWidth: 2,
+  keyWidth: 1.6,
   keyHeight: 0.5,
-  keyDepth: 2,
-  spacing: 0.3,
-  leftOffset: -12,
-  rightOffset: 6,
-  tiltAngle: 0.05,
+  keyDepth: 1.6,
+  spacing: 0.2,
+  leftOffset: -10,
+  rightOffset: 4,
+  tiltAngle: 0.02,
   layerSpacing: 15, // Vertical spacing between layers
+  deskHeight: 10, // Height of desk surface
 };
 
 /**
@@ -34,12 +35,12 @@ export const keyObjects = [];
 export function createKey(keyLabel, x, y, z, tilt, layerName = null) {
   const { keyWidth, keyHeight, keyDepth } = KEYBOARD_CONFIG;
 
-  // Create key geometry and material
+  // Create key geometry - mechanical keyboard style with better definition
   const geometry = new THREE.BoxGeometry(keyWidth, keyHeight, keyDepth);
   const material = new THREE.MeshStandardMaterial({
     color: getKeyColor(keyLabel),
-    roughness: 0.4,
-    metalness: 0.6,
+    roughness: 0.5,
+    metalness: 0.05,
     emissive: 0x000000,
     emissiveIntensity: 0,
   });
@@ -59,12 +60,18 @@ export function createKey(keyLabel, x, y, z, tilt, layerName = null) {
     layerName: layerName,
   };
 
-  // Create text label sprite
+  // Create text label as decal on top of key (printed look)
   const texture = createTextTexture(keyLabel);
-  const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+  const spriteMaterial = new THREE.SpriteMaterial({ 
+    map: texture,
+    depthTest: false,
+    transparent: true,
+  });
   const sprite = new THREE.Sprite(spriteMaterial);
-  sprite.position.set(x, y + keyHeight / 2 + 0.3, z);
-  sprite.scale.set(1.5, 1.5, 1);
+  // Position sprite just above key surface (printed on keycap appearance)
+  sprite.position.set(x, y + keyHeight / 2 + 0.26, z);
+  sprite.scale.set(1.2, 1.2, 1);
+  sprite.renderOrder = 1;
   sprite.userData = {
     label: keyLabel,
     isSprite: true,
@@ -158,24 +165,27 @@ export function createLayerLabel(layerName, y) {
   canvas.width = 512;
   canvas.height = 128;
 
-  // Background
-  context.fillStyle = "rgba(0, 0, 0, 0.7)";
+  // Clean white background with subtle transparency
+  context.fillStyle = "rgba(255, 255, 255, 0.95)";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Border
-  context.strokeStyle = "#ff9800";
-  context.lineWidth = 4;
-  context.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+  // Subtle border
+  context.strokeStyle = "#d0d0d0";
+  context.lineWidth = 2;
+  context.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
 
-  // Text
-  context.fillStyle = "#ffffff";
-  context.font = "bold 48px Arial";
+  // Text - dark gray for contrast
+  context.fillStyle = "#2a2a2a";
+  context.font = "600 42px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.fillText(layerName, canvas.width / 2, canvas.height / 2);
 
   const texture = new THREE.CanvasTexture(canvas);
-  const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+  const spriteMaterial = new THREE.SpriteMaterial({ 
+    map: texture,
+    transparent: true,
+  });
   const sprite = new THREE.Sprite(spriteMaterial);
   sprite.position.set(0, y, -8);
   sprite.scale.set(10, 2.5, 1);
@@ -224,8 +234,8 @@ export function createAllLayerKeyboards(layers) {
     layerGroup.add(leftKeyboard);
     layerGroup.add(rightKeyboard);
 
-    // Position the layer group
-    layerGroup.position.y = yOffset;
+    // Position the layer group on desk
+    layerGroup.position.y = KEYBOARD_CONFIG.deskHeight + yOffset + 0.2;
     layerGroup.userData = {
       layerName: layerName,
       displayName: layer.displayName || layerName,
@@ -235,7 +245,7 @@ export function createAllLayerKeyboards(layers) {
     // Create label for this layer
     const label = createLayerLabel(
       layer.displayName || layerName.toUpperCase(),
-      yOffset + 2,
+      KEYBOARD_CONFIG.deskHeight + yOffset + 3,
     );
 
     layerGroups.push({
@@ -327,27 +337,29 @@ export function selectKey(keyObj) {
 }
 
 /**
- * Animate floating effect for keyboards
+ * Animate subtle floating effect for keyboards on desk
  * @param {THREE.Group} leftKeyboard - Left keyboard group
  * @param {THREE.Group} rightKeyboard - Right keyboard group
  * @param {number} time - Current time in seconds
  */
 export function animateFloating(leftKeyboard, rightKeyboard, time) {
-  leftKeyboard.position.y = Math.sin(time * 0.5) * 0.1;
-  rightKeyboard.position.y = Math.sin(time * 0.5 + Math.PI) * 0.1;
+  // Very subtle breathing effect
+  const baseY = KEYBOARD_CONFIG.deskHeight + 0.2;
+  leftKeyboard.position.y = baseY + Math.sin(time * 0.3) * 0.05;
+  rightKeyboard.position.y = baseY + Math.sin(time * 0.3 + Math.PI) * 0.05;
 }
 
 /**
- * Animate floating effect for all layer keyboards
+ * Animate subtle floating effect for all layer keyboards on desk
  * @param {Array} layerGroups - Array of layer group objects
  * @param {number} time - Current time in seconds
  */
 export function animateAllLayersFloating(layerGroups, time) {
   layerGroups.forEach((layerData, index) => {
-    const baseY = index * KEYBOARD_CONFIG.layerSpacing;
-    const offset = Math.sin(time * 0.5 + (index * Math.PI) / 3) * 0.1;
+    const baseY = KEYBOARD_CONFIG.deskHeight + 0.2 + (index * KEYBOARD_CONFIG.layerSpacing);
+    const offset = Math.sin(time * 0.3 + (index * Math.PI) / 3) * 0.05;
     layerData.group.position.y = baseY + offset;
-    layerData.label.position.y = baseY + 2 + offset;
+    layerData.label.position.y = baseY + 3 + offset;
   });
 }
 

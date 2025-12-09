@@ -25,11 +25,11 @@ export function getKeyColor(keyLabel) {
     "PGDN",
   ];
   const layerSwitch = /^(L\d+|LT\d+|TO\d+)$/;
-  const empty = ["✕", "▽"];
+  const empty = ["✕", "▽", "", " ", "NONE", "TRANS", "&trans", "&none"];
   const bluetooth = /^BT/;
 
-  // Empty or transparent keys
-  if (empty.includes(keyLabel)) {
+  // Empty, unmapped, or transparent keys - return gray
+  if (!keyLabel || keyLabel.trim() === "" || empty.includes(keyLabel)) {
     return keyColors.empty;
   }
 
@@ -123,20 +123,35 @@ export function getKeyType(keyLabel) {
  */
 export function createTextTexture(text, fontSize = 80) {
   const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext("2d", { alpha: true });
   canvas.width = 256;
   canvas.height = 256;
 
-  context.fillStyle = "white";
+  // Clear canvas with full transparency
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Use dark gray/black text for printed legend look
+  context.fillStyle = "#2a2a2a";
   context.textAlign = "center";
   context.textBaseline = "middle";
 
   // Adjust font size for longer labels
   const adjustedFontSize = text.length > 2 ? fontSize * 0.625 : fontSize;
-  context.font = `bold ${adjustedFontSize}px Arial`;
+  // Use a clean sans-serif font for printed legend appearance
+  context.font = `600 ${adjustedFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif`;
+  
+  // Add slight text shadow for depth (subtle embossed effect)
+  context.shadowColor = "rgba(0, 0, 0, 0.15)";
+  context.shadowOffsetX = 0;
+  context.shadowOffsetY = 1;
+  context.shadowBlur = 2;
+  
   context.fillText(text, 128, 128);
 
-  return new THREE.CanvasTexture(canvas);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.premultiplyAlpha = false;
+  texture.needsUpdate = true;
+  return texture;
 }
 
 /**

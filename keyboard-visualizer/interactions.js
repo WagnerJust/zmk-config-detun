@@ -17,6 +17,7 @@ import {
   updateKeyLabelInLayer,
   isKeyModified,
   isKeyModifiedInLayer,
+  getKeymap,
 } from "./keymap-data.js";
 
 /**
@@ -108,33 +109,41 @@ function selectModifier(modifierLabel) {
   // Set new selected modifier
   interactionState.selectedModifier = modifierLabel;
 
-  // Find and highlight the selected modifier key
+  // Find and keep the selected modifier key at normal color
   const modifierKey = keyObjects.find((obj) => obj.label === modifierLabel);
-  if (modifierKey) {
-    selectKey(modifierKey);
-  }
+
+  // Get current layer's keymap
+  const currentKeymap = getKeymap();
+  
+  // Build set of keys that exist in current layer
+  const keysInLayer = new Set();
+  keyObjects.forEach((obj) => {
+    if (obj.label && obj.label !== "✕" && obj.label !== "▽") {
+      keysInLayer.add(obj.label);
+    }
+  });
 
   // Get combinations for this modifier
   const combinations = keyCombinations[modifierLabel] || [];
 
-  // Highlight keys that have combinations
-  const highlightedKeys = new Set();
+  // Track keys that have combinations AND exist in current layer
+  const comboKeys = new Set();
+  comboKeys.add(modifierLabel); // Keep modifier at normal color too
+  
   combinations.forEach((combo) => {
     // Handle special cases
     if (combo.key === "Q-Z") {
-      // Highlight all letter keys
+      // Mark all letter keys that exist in current layer
       keyObjects.forEach((obj) => {
-        if (/^[A-Z]$/.test(obj.label)) {
-          highlightKey(obj, 0x4caf50, 0.6);
-          highlightedKeys.add(obj.label);
+        if (/^[A-Z]$/.test(obj.label) && keysInLayer.has(obj.label)) {
+          comboKeys.add(obj.label);
         }
       });
     } else if (combo.key === "1-9") {
-      // Highlight number keys
+      // Mark number keys that exist in current layer
       keyObjects.forEach((obj) => {
-        if (/^[1-9]$/.test(obj.label)) {
-          highlightKey(obj, 0x2196f3, 0.6);
-          highlightedKeys.add(obj.label);
+        if (/^[1-9]$/.test(obj.label) && keysInLayer.has(obj.label)) {
+          comboKeys.add(obj.label);
         }
       });
     } else if (
@@ -145,20 +154,20 @@ function selectModifier(modifierLabel) {
     ) {
       // Skip arrow keys for now (not in base layout)
     } else {
-      // Find exact key match
+      // Mark exact key match only if it exists in current layer
       const key = keyObjects.find((obj) => obj.label === combo.key);
-      if (key) {
-        highlightKey(key, 0xffff00, 0.7);
-        highlightedKeys.add(key.label);
+      if (key && keysInLayer.has(combo.key)) {
+        comboKeys.add(key.label);
       }
     }
   });
 
-  // Dim keys that don't have combinations
+  // Grey out keys that don't have combinations
   keyObjects.forEach((obj) => {
-    if (!highlightedKeys.has(obj.label) && obj.label !== modifierLabel) {
+    if (!comboKeys.has(obj.label)) {
       dimKey(obj, 0.3);
     }
+    // Keys with combinations stay at their normal color (no highlighting)
   });
 
   // Update combinations panel
