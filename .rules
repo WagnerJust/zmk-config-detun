@@ -1,5 +1,3 @@
-**NEVER** EDIT OR CREATE ANY MARKDOWN FILES UNLESS EXPLICITLY ASKED BY THE USER TO DO SO.
-
 ## Source of Truth
 - **Always** consult keyboard_visualizer/keyboard_visualizer.spec in this directory for:
   - Technology stack and architecture decisions
@@ -23,3 +21,7 @@
 ## Other
 - No build step required - pure vanilla JS
 - Works with Python/PHP/Node HTTP serverss
+
+## PROHIBITED
+- Do not use emojis in comments, logs, or anywhere unless expliclity asked.
+- **NEVER** EDIT OR CREATE ANY MARKDOWN FILES UNLESS EXPLICITLY ASKED BY THE USER TO DO SO.
