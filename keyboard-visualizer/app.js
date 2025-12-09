@@ -375,12 +375,6 @@ function handleLayerSwitch(layerName) {
  * Handle edit mode toggle
  */
 function handleEditModeToggle() {
-  // Don't allow edit mode in multi-layer view
-  if (app.multiLayerMode) {
-    alert("Please switch to a single layer view to use edit mode");
-    return;
-  }
-
   const isActive = toggleEditMode();
   const toggleBtn = document.getElementById("edit-mode-toggle");
   const exportBtn = document.getElementById("export-keymap");
@@ -393,7 +387,7 @@ function handleEditModeToggle() {
     toggleBtn.classList.add("active");
     exportBtn.style.display = "inline-block";
     exportZmkBtn.style.display = "inline-block";
-    interactiveHelp.textContent = "✏️ Click any key to edit its label!";
+    interactiveHelp.textContent = "✏️ Click any key in any layer to edit its label!";
   } else {
     toggleBtn.textContent = "Edit Mode: OFF";
     toggleBtn.classList.remove("active");

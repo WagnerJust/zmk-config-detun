@@ -28,9 +28,10 @@ export const keyObjects = [];
  * @param {number} y - Y position
  * @param {number} z - Z position
  * @param {number} tilt - Rotation tilt
+ * @param {string} layerName - Layer name this key belongs to (optional)
  * @returns {Object} - Object containing key mesh and sprite
  */
-export function createKey(keyLabel, x, y, z, tilt) {
+export function createKey(keyLabel, x, y, z, tilt, layerName = null) {
   const { keyWidth, keyHeight, keyDepth } = KEYBOARD_CONFIG;
 
   // Create key geometry and material
@@ -55,6 +56,7 @@ export function createKey(keyLabel, x, y, z, tilt) {
     originalColor: getKeyColor(keyLabel),
     originalScale: { x: 1, y: 1, z: 1 },
     isKey: true,
+    layerName: layerName,
   };
 
   // Create text label sprite
@@ -77,9 +79,10 @@ export function createKey(keyLabel, x, y, z, tilt) {
  * @param {Array} keymap - 2D array of key labels
  * @param {number} offsetX - X offset for positioning
  * @param {string} side - 'left' or 'right'
+ * @param {string} layerName - Layer name this keyboard belongs to (optional)
  * @returns {THREE.Group} - Group containing all keys
  */
-export function createKeyboard(keymap, offsetX, side = "left") {
+export function createKeyboard(keymap, offsetX, side = "left", layerName = null) {
   const group = new THREE.Group();
   const { keyWidth, keyHeight, keyDepth, spacing, tiltAngle } = KEYBOARD_CONFIG;
   const tilt = side === "left" ? tiltAngle : -tiltAngle;
@@ -95,7 +98,7 @@ export function createKeyboard(keymap, offsetX, side = "left") {
       const z = row * (keyDepth + spacing);
 
       // Create key and sprite
-      const { key, sprite } = createKey(keyLabel, x, y, z, tilt);
+      const { key, sprite } = createKey(keyLabel, x, y, z, tilt, layerName);
 
       // Store reference for interactions
       keyObjects.push({
@@ -106,6 +109,7 @@ export function createKeyboard(keymap, offsetX, side = "left") {
         row: row,
         col: col,
         group: group,
+        layerName: layerName,
       });
 
       group.add(key);
@@ -206,11 +210,13 @@ export function createAllLayerKeyboards(layers) {
       keymap,
       KEYBOARD_CONFIG.leftOffset,
       "left",
+      layerName,
     );
     const rightKeyboard = createKeyboard(
       keymap,
       KEYBOARD_CONFIG.rightOffset,
       "right",
+      layerName,
     );
 
     // Create a group to hold both keyboards

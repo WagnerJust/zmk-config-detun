@@ -1,5 +1,5 @@
 # Keyboard Visualizer - Technical Specification
-# Version: 1.2.0
+# Version: 1.3.0
 # Last Updated: December 2024
 # Project: ZMK Detun Keyboard 3D Visualizer
 
@@ -12,7 +12,8 @@
 
 **Key Features**:
 - Multi-layer simultaneous view (all 3 layers stacked vertically)
-- Interactive key editing with visual modification tracking
+- Interactive key editing with visual modification tracking (works in all views)
+- Per-layer key editing - edit keys in any layer independently
 - Real-time layer switching between single and multi-layer views
 - Auto-load from ZMK configuration files
 - Export modified keymaps as JSON
@@ -44,6 +45,7 @@
 - FR-018: Customizable key colors by type with real-time preview
 - FR-019: Persistent color preferences stored in browser localStorage
 - FR-020: Reset colors to default functionality
+- FR-021: Per-layer key editing - edit keys in any layer while in multi-layer view
 
 ### Non-Functional Requirements
 - NFR-001: Load and render within 3 seconds

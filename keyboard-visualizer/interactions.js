@@ -14,7 +14,9 @@ import {
 import {
   keyCombinations,
   updateKeyLabel,
+  updateKeyLabelInLayer,
   isKeyModified,
+  isKeyModifiedInLayer,
 } from "./keymap-data.js";
 
 /**
@@ -272,7 +274,8 @@ export function handleMouseMove(event, camera, renderer) {
           // Only reset if not part of current selection or modified
           const material = interactionState.hoveredKey.mesh.material;
           if (material.emissiveIntensity < 0.3 || interactionState.editMode) {
-            if (!interactionState.hoveredKey.mesh.userData.isModified) {
+            const layerName = interactionState.hoveredKey.layerName || "default";
+            if (!isKeyModifiedInLayer(layerName, interactionState.hoveredKey.row, interactionState.hoveredKey.col)) {
               material.emissive.setHex(0x000000);
               material.emissiveIntensity = 0;
             } else {
@@ -308,7 +311,8 @@ export function handleMouseMove(event, camera, renderer) {
     ) {
       const material = interactionState.hoveredKey.mesh.material;
       if (material.emissiveIntensity < 0.3 || interactionState.editMode) {
-        if (!interactionState.hoveredKey.mesh.userData.isModified) {
+        const layerName = interactionState.hoveredKey.layerName || "default";
+        if (!isKeyModifiedInLayer(layerName, interactionState.hoveredKey.row, interactionState.hoveredKey.col)) {
           material.emissive.setHex(0x000000);
           material.emissiveIntensity = 0;
         } else {
@@ -357,7 +361,9 @@ function openEditPanel(keyObj) {
   // Update panel content
   const side = keyObj.col < 6 ? "Left" : "Right";
   const displayCol = keyObj.col < 6 ? keyObj.col : keyObj.col - 6;
-  positionEl.textContent = `${side} - Row ${keyObj.row + 1}, Col ${displayCol + 1}`;
+  const layerName = keyObj.layerName || "default";
+  const layerDisplay = layerName.charAt(0).toUpperCase() + layerName.slice(1);
+  positionEl.textContent = `Layer: ${layerDisplay} | ${side} - Row ${keyObj.row + 1}, Col ${displayCol + 1}`;
   labelInput.value = keyObj.label;
 
   // Show panel
@@ -397,8 +403,11 @@ function saveEditedKey() {
     return;
   }
 
-  // Update the keymap data
-  updateKeyLabel(keyObj.row, keyObj.col, newLabel);
+  // Determine which layer to update
+  const layerName = keyObj.layerName || "default";
+
+  // Update the keymap data for the specific layer
+  updateKeyLabelInLayer(layerName, keyObj.row, keyObj.col, newLabel);
 
   // Update the visual key
   updateKeyMesh(keyObj, newLabel);
@@ -409,7 +418,7 @@ function saveEditedKey() {
   // Close panel
   closeEditPanel();
 
-  console.log(`✅ Key updated to: ${newLabel}`);
+  console.log(`✅ Key updated to: ${newLabel} in layer ${layerName}`);
 }
 
 /**

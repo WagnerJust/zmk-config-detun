@@ -271,20 +271,44 @@ export function switchLayer(layerName) {
 }
 
 /**
- * Update a key label at a specific position
+ * Update a key label at a specific position in the current layer
  * @param {number} row - Row index (0-4)
  * @param {number} col - Column index (0-11)
  * @param {string} newLabel - New label for the key
  */
 export function updateKeyLabel(row, col, newLabel) {
-  if (row >= 0 && row < keymap.length && col >= 0 && col < keymap[row].length) {
-    const oldLabel = keymap[row][col];
-    keymap[row][col] = newLabel;
+  return updateKeyLabelInLayer(currentLayerName, row, col, newLabel);
+}
+
+/**
+ * Update a key label at a specific position in a specific layer
+ * @param {string} layerName - Layer name
+ * @param {number} row - Row index (0-4)
+ * @param {number} col - Column index (0-11)
+ * @param {string} newLabel - New label for the key
+ */
+export function updateKeyLabelInLayer(layerName, row, col, newLabel) {
+  // Check if layer exists
+  if (!layers[layerName]) {
+    console.warn(`⚠️  Layer not found: ${layerName}`);
+    return false;
+  }
+
+  const layerKeymap = layers[layerName].keymap;
+  
+  if (row >= 0 && row < layerKeymap.length && col >= 0 && col < layerKeymap[row].length) {
+    const oldLabel = layerKeymap[row][col];
+    layerKeymap[row][col] = newLabel;
+
+    // Update the main keymap if this is the current layer
+    if (layerName === currentLayerName) {
+      keymap[row][col] = newLabel;
+    }
 
     // Track modification
-    const key = `${currentLayerName}:${row}:${col}`;
+    const key = `${layerName}:${row}:${col}`;
     keymapModifications[key] = {
-      layer: currentLayerName,
+      layer: layerName,
       row,
       col,
       oldLabel,
@@ -294,7 +318,7 @@ export function updateKeyLabel(row, col, newLabel) {
 
     hasModifications = true;
     console.log(
-      `✏️  Updated key at [${row},${col}]: ${oldLabel} → ${newLabel}`,
+      `✏️  Updated key at [${row},${col}] in layer ${layerName}: ${oldLabel} → ${newLabel}`,
     );
     return true;
   }
@@ -303,13 +327,24 @@ export function updateKeyLabel(row, col, newLabel) {
 }
 
 /**
- * Check if a key has been modified
+ * Check if a key has been modified in the current layer
  * @param {number} row - Row index
  * @param {number} col - Column index
  * @returns {boolean}
  */
 export function isKeyModified(row, col) {
-  const key = `${currentLayerName}:${row}:${col}`;
+  return isKeyModifiedInLayer(currentLayerName, row, col);
+}
+
+/**
+ * Check if a key has been modified in a specific layer
+ * @param {string} layerName - Layer name
+ * @param {number} row - Row index
+ * @param {number} col - Column index
+ * @returns {boolean}
+ */
+export function isKeyModifiedInLayer(layerName, row, col) {
+  const key = `${layerName}:${row}:${col}`;
   return keymapModifications.hasOwnProperty(key);
 }
 
