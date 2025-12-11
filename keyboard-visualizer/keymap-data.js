@@ -9,11 +9,11 @@ export const defaultKeymap = [
   // Row 1 (top)
   ["ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "BSPC"],
   // Row 2
-  ["TAB", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "\\"],
+  ["TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "\\"],
   // Row 3
-  ["CAPS", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";", "ENT"],
+  ["CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "ENT"],
   // Row 4
-  ["SHFT", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "/", "'"],
+  ["SHFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "'"],
   // Row 5 (bottom row with thumb keys)
   ["CTRL", "ALT", "GUI", "`", "GUI", "SPC", "SPC", "L1", "←", "↓", "↑", "→"],
 ];
@@ -28,6 +28,43 @@ export let currentLayerName = "default";
 // Track modifications to the keymap
 export let keymapModifications = {};
 export let hasModifications = false;
+
+// Track shift/caps state
+export let shiftState = {
+  shiftActive: false,
+  capsActive: false,
+};
+
+// Shifted key mappings
+export const shiftedKeys = {
+  // Numbers to symbols
+  '1': '!',
+  '2': '@',
+  '3': '#',
+  '4': '$',
+  '5': '%',
+  '6': '^',
+  '7': '&',
+  '8': '*',
+  '9': '(',
+  '0': ')',
+  // Special characters
+  '-': '_',
+  '=': '+',
+  '[': '{',
+  ']': '}',
+  '\\': '|',
+  ';': ':',
+  "'": '"',
+  ',': '<',
+  '.': '>',
+  '/': '?',
+  '`': '~',
+};
+
+// Letters that should be capitalized when shift or caps is active
+const letters = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+const lettersSet = new Set(letters.split(''));
 
 // Default color for all keys
 export const defaultKeyColor = 0xf5e6d3; // Cream colored (like nice PBT keycaps)
@@ -58,6 +95,80 @@ async function loadCustomColors() {
 
 // Initialize colors on module load (async)
 export const colorsLoadedPromise = loadCustomColors();
+
+/**
+ * Get the display label for a key based on shift/caps state
+ * @param {string} baseLabel - The base label of the key
+ * @returns {string} - The display label
+ */
+export function getDisplayLabel(baseLabel) {
+  const shouldCapitalize = shiftState.shiftActive || shiftState.capsActive;
+  const upperLabel = baseLabel.toUpperCase();
+  const lowerLabel = baseLabel.toLowerCase();
+  
+  // If shift is active, check for shifted symbol
+  if (shiftState.shiftActive && shiftedKeys[lowerLabel]) {
+    return shiftedKeys[lowerLabel];
+  }
+  
+  // If shift OR caps is active, capitalize letters
+  if (shouldCapitalize && lettersSet.has(upperLabel)) {
+    return upperLabel;
+  }
+  
+  // For lowercase letters when neither shift nor caps is active
+  if (!shouldCapitalize && lettersSet.has(upperLabel)) {
+    return lowerLabel;
+  }
+  
+  return baseLabel;
+}
+
+/**
+ * Toggle shift state
+ * @returns {boolean} - New shift state
+ */
+export function toggleShift() {
+  shiftState.shiftActive = !shiftState.shiftActive;
+  console.log(`${shiftState.shiftActive ? '⬆️' : '⬇️'} Shift ${shiftState.shiftActive ? 'ON' : 'OFF'}`);
+  return shiftState.shiftActive;
+}
+
+/**
+ * Toggle caps lock state
+ * @returns {boolean} - New caps state
+ */
+export function toggleCaps() {
+  shiftState.capsActive = !shiftState.capsActive;
+  console.log(`${shiftState.capsActive ? '🔒' : '🔓'} Caps Lock ${shiftState.capsActive ? 'ON' : 'OFF'}`);
+  return shiftState.capsActive;
+}
+
+/**
+ * Get current shift/caps state
+ * @returns {Object} - Current state
+ */
+export function getShiftState() {
+  return { ...shiftState };
+}
+
+/**
+ * Check if a key label is SHIFT
+ * @param {string} label - Key label
+ * @returns {boolean}
+ */
+export function isShiftKey(label) {
+  return label === 'SHFT';
+}
+
+/**
+ * Check if a key label is CAPS
+ * @param {string} label - Key label
+ * @returns {boolean}
+ */
+export function isCapsKey(label) {
+  return label === 'CAPS';
+}
 
 // Key combinations data
 export const keyCombinations = {

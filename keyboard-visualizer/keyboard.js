@@ -1,7 +1,7 @@
 // Keyboard builder module - Creates 3D keyboard representations
 
 import { getKeyColor, createTextTexture } from "./utils.js";
-import { getKeyColorAt } from "./keymap-data.js";
+import { getKeyColorAt, getDisplayLabel } from "./keymap-data.js";
 
 /**
  * Keyboard configuration constants
@@ -464,4 +464,29 @@ export function markKeyAsModified(keyObj) {
  */
 export function findKeyByPosition(row, col) {
   return keyObjects.find((obj) => obj.row === row && obj.col === col) || null;
+}
+
+/**
+ * Update all key labels based on shift/caps state
+ * Uses the base label stored in userData and applies shift/caps transformations
+ */
+export function updateAllKeyLabels() {
+  keyObjects.forEach((obj) => {
+    const baseLabel = obj.mesh.userData.baseLabel || obj.label;
+    if (!obj.mesh.userData.baseLabel) {
+      obj.mesh.userData.baseLabel = baseLabel;
+    }
+    
+    const displayLabel = getDisplayLabel(baseLabel);
+    
+    if (displayLabel !== obj.label) {
+      obj.label = displayLabel;
+      obj.mesh.userData.label = displayLabel;
+      
+      const texture = createTextTexture(displayLabel);
+      obj.sprite.material.map.dispose();
+      obj.sprite.material.map = texture;
+      obj.sprite.material.needsUpdate = true;
+    }
+  });
 }

@@ -26,7 +26,7 @@ export function getKeyColor(keyLabel, layerName = null, row = null, col = null) 
  * @returns {boolean}
  */
 export function isModifierKey(keyLabel) {
-  return ["CTRL", "GUI", "ALT", "SHFT"].includes(keyLabel);
+  return ["CTRL", "GUI", "ALT", "SHFT", "CAPS"].includes(keyLabel);
 }
 
 /**
@@ -72,7 +72,7 @@ export function getKeyType(keyLabel) {
 
   if (isEmptyKey(keyLabel)) return "empty";
   if (isLayerKey(keyLabel)) return "layer";
-  if (letters.includes(keyLabel)) return "letters";
+  if (letters.includes(keyLabel) || letters.toLowerCase().includes(keyLabel)) return "letters";
   if (numbers.includes(keyLabel)) return "numbers";
   if (modifiers.includes(keyLabel)) return "modifiers";
   if (navigation.includes(keyLabel)) return "navigation";

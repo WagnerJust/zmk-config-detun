@@ -1,5 +1,5 @@
 # Keyboard Visualizer - Technical Specification
-# Version: 1.6.0
+# Version: 1.7.0
 # Last Updated: December 2025
 # Project: ZMK Detun Keyboard 3D Visualizer
 
@@ -22,6 +22,7 @@
 - Modifier key combinations display
 - Full 3D camera controls (rotate, pan, zoom)
 - Type-based color customization with settings panel and persistent storage
+- Shift and Caps Lock key toggling with dynamic label updates (letters and symbols)
 
 ## Core Requirements
 
@@ -49,6 +50,7 @@
 - FR-021: Per-layer key editing - edit keys in any layer while in multi-layer view
 - FR-022: Save keymap changes to backend server for direct file system updates (enables git push workflow)
 - FR-023: Draggable color picker panel - user can reposition picker by dragging the header
+- FR-024: Shift and Caps Lock toggle functionality - clicking SHIFT or CAPS keys dynamically updates all key labels to show shifted values (e.g., '1' becomes '!', 'a' becomes 'A')
 
 ### Non-Functional Requirements
 - NFR-001: Load and render within 3 seconds
@@ -154,6 +156,7 @@
   - Manage layer data
   - Provide key combination definitions
   - Track current active layer
+  - Manage shift/caps lock state and label transformations
 - **Exports**:
   - `initKeymapData()`: async → {success, source, keymap, layers, currentLayer}
   - `getKeymap()`: → Array<Array<string>>
@@ -174,11 +177,19 @@
   - `getDefaultKeyColor()`: → number (returns default cream color)
   - `colorsLoadedPromise`: Promise (resolves when colors loaded from backend)
   - `getDefaultKeyColors()`: → Object (returns defaultKeyColors)
+  - `getDisplayLabel(baseLabel)`: → string (returns display label based on shift/caps state)
+  - `toggleShift()`: → boolean (toggles shift state, returns new state)
+  - `toggleCaps()`: → boolean (toggles caps lock state, returns new state)
+  - `getShiftState()`: → Object (returns current shift/caps state)
+  - `isShiftKey(label)`: → boolean (checks if key is SHIFT)
+  - `isCapsKey(label)`: → boolean (checks if key is CAPS)
   - `defaultKeymap`: Array<Array<string>>
   - `defaultKeyColors`: Object
   - `keyColors`: Object (mutable, customizable)
   - `keyTypes`: Object
   - `keyCombinations`: Object
+  - `shiftState`: Object (tracks shift/caps active state)
+  - `shiftedKeys`: Object (maps base keys to shifted values)
 - **Imports**: zmk-parser.js
 - **Color Management**:
   - Default color: `0xf5e6d3` (cream) for all keys
@@ -675,6 +686,25 @@ Array<Array<string>> [
 - **Layer Switching**: Switch between individual layers
 - **Export**: Save modifications as JSON
 
+### Shift and Caps Lock
+- **SHIFT Key**: Click to toggle shift state
+  - When active: Letters become uppercase (a→A), numbers become symbols (1→!, 2→@, etc.)
+  - Visual indicator: SHIFT key highlighted in green (0x4caf50)
+  - All key labels update in real-time to show shifted values
+  - Click again to deactivate
+- **CAPS Key**: Click to toggle caps lock state
+  - When active: All letters become uppercase (a→A)
+  - Visual indicator: CAPS key highlighted in orange (0xff9800)
+  - Numbers and symbols remain unchanged
+  - All letter key labels update in real-time
+  - Click again to deactivate
+- **State Independence**: SHIFT and CAPS states work independently
+- **Label Transformation**: 
+  - Letter keys: Display lowercase by default, uppercase when SHIFT or CAPS active
+  - Symbol keys: Show shifted symbols when SHIFT active (e.g., / becomes ?)
+  - Number keys: Show symbols when SHIFT active (1→!, 2→@, 3→#, etc.)
+- **Persistent Highlighting**: SHIFT/CAPS keys remain highlighted when other modifiers selected
+
 ### Color Customization
 - **Settings Panel**: Click "Customize Colors" button to open color settings panel
 - **Type-Based Coloring**: Customize colors for 7 key types (letters, numbers, modifiers, navigation, special, layerSwitch, empty)
@@ -728,6 +758,41 @@ yPosition = layerIndex * KEYBOARD_CONFIG.layerSpacing;
 - Single-layer: FOV 75°, distance 25 units
 - Focused on single keyboard pair
 - Allows zoom from 10 to 50 units
+
+### Shift and Caps Lock Implementation
+1. **State Management** (keymap-data.js):
+   - `shiftState` object tracks `shiftActive` and `capsActive` booleans
+   - `shiftedKeys` object maps base keys to shifted values (1→!, 2→@, /→?, etc.)
+   - Toggle functions update state and log to console
+
+2. **Label Transformation** (keymap-data.js):
+   - `getDisplayLabel(baseLabel)` function applies transformations
+   - Priority: Shift symbols > Capitalization > Base label
+   - Letters: Uppercase when shift OR caps active, lowercase otherwise
+   - Numbers: Show symbols when shift active (1→!, 2→@, 3→#, etc.)
+   - Special chars: Show shifted version when shift active (/→?, ,→<, etc.)
+
+3. **Visual Updates** (keyboard.js):
+   - `updateAllKeyLabels()` iterates through all key objects
+   - Stores original base label in `mesh.userData.baseLabel`
+   - Applies `getDisplayLabel()` transformation
+   - Regenerates text texture for each modified key
+   - Updates sprite material with new texture
+
+4. **Interaction Handling** (interactions.js):
+   - Detects SHIFT/CAPS key clicks using base label
+   - Toggles state via keymap-data functions
+   - Calls `updateAllKeyLabels()` to refresh display
+   - Applies visual highlighting (green for SHIFT, orange for CAPS)
+   - Preserves highlighting when other modifiers selected
+   - Resets highlighting when deactivated
+
+5. **Default State**:
+   - Both shift and caps start as inactive (false)
+   - Letters display as lowercase by default (a-z, not A-Z)
+   - ZMK parser outputs lowercase letters
+   - Default keymap uses lowercase letters
+
 ./DEVELOPER.md               - Developer guide
 ./QUICKSTART.md              - Quick start guide
 ./START_HERE.md              - Simple launch instructions

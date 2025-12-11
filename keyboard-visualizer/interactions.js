@@ -10,6 +10,7 @@ import {
   updateKeyLabel as updateKeyMesh,
   findKeyByPosition,
   markKeyAsModified,
+  updateAllKeyLabels,
 } from "./keyboard.js";
 import {
   keyCombinations,
@@ -18,6 +19,11 @@ import {
   isKeyModified,
   isKeyModifiedInLayer,
   getKeymap,
+  toggleShift,
+  toggleCaps,
+  isShiftKey,
+  isCapsKey,
+  getShiftState,
 } from "./keymap-data.js";
 
 // Import color mode state
@@ -85,10 +91,37 @@ function getIntersectedKey(camera) {
  */
 function handleKeyClick(keyObj) {
   const keyLabel = keyObj.label;
+  const baseLabel = keyObj.mesh.userData.baseLabel || keyLabel;
 
   // If in edit mode, open edit panel
   if (interactionState.editMode) {
     openEditPanel(keyObj);
+    return;
+  }
+
+  // Check if it's SHIFT key
+  if (isShiftKey(baseLabel)) {
+    const shiftActive = toggleShift();
+    updateAllKeyLabels();
+    
+    if (shiftActive) {
+      highlightKey(keyObj, 0x4caf50, 0.5);
+    } else {
+      resetAllKeys();
+    }
+    return;
+  }
+
+  // Check if it's CAPS key
+  if (isCapsKey(baseLabel)) {
+    const capsActive = toggleCaps();
+    updateAllKeyLabels();
+    
+    if (capsActive) {
+      highlightKey(keyObj, 0xff9800, 0.5);
+    } else {
+      resetAllKeys();
+    }
     return;
   }
 
@@ -115,6 +148,17 @@ function handleKeyClick(keyObj) {
 function selectModifier(modifierLabel) {
   // Reset previous state
   resetAllKeys();
+  
+  // Preserve shift/caps highlighting
+  const shiftState = getShiftState();
+  keyObjects.forEach((obj) => {
+    const baseLabel = obj.mesh.userData.baseLabel || obj.label;
+    if (shiftState.shiftActive && isShiftKey(baseLabel)) {
+      highlightKey(obj, 0x4caf50, 0.5);
+    } else if (shiftState.capsActive && isCapsKey(baseLabel)) {
+      highlightKey(obj, 0xff9800, 0.5);
+    }
+  });
 
   // Set new selected modifier
   interactionState.selectedModifier = modifierLabel;
@@ -138,19 +182,18 @@ function selectModifier(modifierLabel) {
 
   // Track keys that have combinations AND exist in current layer
   const comboKeys = new Set();
-  comboKeys.add(modifierLabel); // Keep modifier at normal color too
+  comboKeys.add(modifierLabel);
   
   combinations.forEach((combo) => {
-    // Handle special cases
     if (combo.key === "Q-Z") {
-      // Mark all letter keys that exist in current layer
       keyObjects.forEach((obj) => {
-        if (/^[A-Z]$/.test(obj.label) && keysInLayer.has(obj.label)) {
+        const baseLabel = obj.mesh.userData.baseLabel || obj.label;
+        const testLabel = baseLabel.toUpperCase();
+        if (/^[A-Z]$/.test(testLabel) && (keysInLayer.has(testLabel) || keysInLayer.has(baseLabel))) {
           comboKeys.add(obj.label);
         }
       });
     } else if (combo.key === "1-9") {
-      // Mark number keys that exist in current layer
       keyObjects.forEach((obj) => {
         if (/^[1-9]$/.test(obj.label) && keysInLayer.has(obj.label)) {
           comboKeys.add(obj.label);
@@ -162,25 +205,27 @@ function selectModifier(modifierLabel) {
       combo.key.includes("↑") ||
       combo.key.includes("↓")
     ) {
-      // Skip arrow keys for now (not in base layout)
     } else {
-      // Mark exact key match only if it exists in current layer
-      const key = keyObjects.find((obj) => obj.label === combo.key);
-      if (key && keysInLayer.has(combo.key)) {
+      const key = keyObjects.find((obj) => {
+        const baseLabel = obj.mesh.userData.baseLabel || obj.label;
+        return combo.key === baseLabel.toUpperCase() || combo.key === baseLabel;
+      });
+      if (key && (keysInLayer.has(combo.key) || keysInLayer.has(key.label))) {
         comboKeys.add(key.label);
       }
     }
   });
 
-  // Grey out keys that don't have combinations
   keyObjects.forEach((obj) => {
     if (!comboKeys.has(obj.label)) {
-      dimKey(obj, 0.3);
+      const baseLabel = obj.mesh.userData.baseLabel || obj.label;
+      if (!(shiftState.shiftActive && isShiftKey(baseLabel)) && 
+          !(shiftState.capsActive && isCapsKey(baseLabel))) {
+        dimKey(obj, 0.3);
+      }
     }
-    // Keys with combinations stay at their normal color (no highlighting)
   });
 
-  // Update combinations panel
   updateCombinationsPanel(modifierLabel, combinations);
 }
 
@@ -190,6 +235,17 @@ function selectModifier(modifierLabel) {
 function deselectModifier() {
   interactionState.selectedModifier = null;
   resetAllKeys();
+  
+  const shiftState = getShiftState();
+  keyObjects.forEach((obj) => {
+    const baseLabel = obj.mesh.userData.baseLabel || obj.label;
+    if (shiftState.shiftActive && isShiftKey(baseLabel)) {
+      highlightKey(obj, 0x4caf50, 0.5);
+    } else if (shiftState.capsActive && isCapsKey(baseLabel)) {
+      highlightKey(obj, 0xff9800, 0.5);
+    }
+  });
+  
   hideCombinationsPanel();
 }
 
