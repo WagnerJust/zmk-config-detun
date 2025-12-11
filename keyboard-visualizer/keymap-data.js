@@ -7,15 +7,15 @@ import { loadKeymapFromZMK } from "./zmk-parser.js";
 // This is used if the ZMK config can't be loaded
 export const defaultKeymap = [
   // Row 1 (top)
-  ["TAB", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "BSPC"],
+  ["ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "BSPC"],
   // Row 2
-  ["CTRL", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";", "'"],
+  ["TAB", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "\\"],
   // Row 3
-  ["SHFT", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "/", "ESC"],
-  // Row 4 (thumb keys padded)
-  ["✕", "✕", "GUI", "L1", "SPC", "✕", "✕", "ENT", "L2", "ALT", "✕", "✕"],
-  // Row 5 (empty for this layout)
-  ["✕", "✕", "✕", "✕", "✕", "✕", "✕", "✕", "✕", "✕", "✕", "✕"],
+  ["CAPS", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";", "ENT"],
+  // Row 4
+  ["SHFT", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "/", "'"],
+  // Row 5 (bottom row with thumb keys)
+  ["CTRL", "ALT", "GUI", "`", "GUI", "SPC", "SPC", "L1", "←", "↓", "↑", "→"],
 ];
 
 // Current active keymap (will be loaded from ZMK or use default)

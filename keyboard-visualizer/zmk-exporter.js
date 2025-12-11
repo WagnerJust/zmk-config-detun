@@ -121,13 +121,13 @@ function toZMKKeycode(key) {
   }
 
   // Bluetooth commands
-  if (key === "BT_CLR") return "&bt BT_CLR";
+  if (key === "BT_CLR" || key === "BTCLR") return "&bt BT_CLR";
   if (key.match(/^BT\d+$/)) {
     const btNum = key.substring(2);
     return `&bt BT_SEL ${btNum}`;
   }
-  if (key === "BT_NXT") return "&bt BT_NXT";
-  if (key === "BT_PRV") return "&bt BT_PRV";
+  if (key === "BT_NXT" || key === "BTNXT") return "&bt BT_NXT";
+  if (key === "BT_PRV" || key === "BTPRV") return "&bt BT_PRV";
 
   // Default: assume it's a direct keycode
   return `&kp ${key}`;

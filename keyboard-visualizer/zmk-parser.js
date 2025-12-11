@@ -275,13 +275,13 @@ function parseKeycodeLabel(keycode) {
 
   // Handle Bluetooth commands (&bt)
   if (keycode.startsWith("&bt")) {
-    if (keycode.includes("BT_CLR")) return "BT🗑";
+    if (keycode.includes("BT_CLR")) return "BTCLR";
     const btSelMatch = keycode.match(/BT_SEL\s+(\d+)/);
     if (btSelMatch) {
       return `BT${btSelMatch[1]}`;
     }
-    if (keycode.includes("BT_NXT")) return "BT→";
-    if (keycode.includes("BT_PRV")) return "BT←";
+    if (keycode.includes("BT_NXT")) return "BTNXT";
+    if (keycode.includes("BT_PRV")) return "BTPRV";
     return "BT";
   }
 
