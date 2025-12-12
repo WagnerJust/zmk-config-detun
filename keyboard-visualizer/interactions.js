@@ -125,20 +125,8 @@ function handleKeyClick(keyObj) {
     return;
   }
 
-  // Check if it's a modifier key
-  if (!isModifierKey(keyLabel)) {
-    console.log(`Clicked non-modifier key: ${keyLabel}`);
-    return;
-  }
-
-  // If clicking the same modifier, deselect it
-  if (interactionState.selectedModifier === keyLabel) {
-    deselectModifier();
-    return;
-  }
-
-  // Select the new modifier
-  selectModifier(keyLabel);
+  // GUI, Alt, and Ctrl keys no longer show combinations
+  console.log(`Clicked key: ${keyLabel}`);
 }
 
 /**
@@ -337,7 +325,7 @@ export function handleMouseMove(event, camera, renderer) {
   if (keyObj) {
     // In color mode or edit mode, all keys are clickable
     const isClickable =
-      isColorModeActive() || interactionState.editMode || isModifierKey(keyObj.label);
+      isColorModeActive() || interactionState.editMode;
 
     // Update cursor style
     if (isClickable) {
@@ -572,7 +560,7 @@ export function setupInteractions(camera, renderer) {
   }
 
   console.log(
-    "Interactions initialized - click on modifier keys (Ctrl, Shift, Alt, GUI) to see combinations!",
+    "Interactions initialized",
   );
 }
 
