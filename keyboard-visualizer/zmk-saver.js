@@ -244,7 +244,8 @@ function generateKeymapFile(layers) {
                 compatible = "zmk,keymap";
 `;
 
-  const footer = `        };
+  const footer = `
+        };
 };`;
 
   const layerSections = layerNames.map((layerName) => {
