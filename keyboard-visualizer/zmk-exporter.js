@@ -71,9 +71,9 @@ function toZMKKeycode(key) {
     return `&kp N${key}`;
   }
 
-  // Single letters
-  if (key.match(/^[A-Z]$/)) {
-    return `&kp ${key}`;
+  // Single letters (convert lowercase to uppercase for ZMK)
+  if (key.match(/^[a-zA-Z]$/)) {
+    return `&kp ${key.toUpperCase()}`;
   }
 
   // Function keys
