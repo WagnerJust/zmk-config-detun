@@ -30,15 +30,15 @@
                 lower_layer {
 // ---------------------------------------------------------------------------------
 // |       |       |       |       |       |       |     |       |       |       | _     | +     |       |
-// |       |       |       |       |       |       |     |       |       |       | -     | =     |       |
+// |       |       |       | {     | }     |       |     |       |       | -     | _     | =     |       |
 // |       |       |       | (     | )     |       |     |       | [     | ]     | '     | "     |       |
-// |       |       |       |       |       |       |     |       |       |       |       |       |       |
+// |       |       |       |       |       |       |     |       | -     | +     | =     |       |       |
 // |       |       |       |       |       |       |     |       |       |       |       |       |       |
                         bindings = <
    &trans  &trans  &trans  &trans  &trans  &trans               &trans  &trans  &trans  &kp UNDER  &kp PLUS  &trans
-   &trans  &trans  &trans  &trans  &trans  &trans               &trans  &trans  &trans  &kp MINUS  &kp EQUAL  &trans
+   &trans  &trans  &trans  &kp LBRC  &kp RBRC  &trans               &trans  &trans  &kp MINUS  &kp UNDER  &kp EQUAL  &trans
    &trans  &trans  &trans  &kp LPAR  &kp RPAR  &trans               &trans  &kp LBKT  &kp RBKT  &kp SQT  &kp DQT  &trans
-   &trans  &trans  &trans  &trans  &trans  &trans               &trans  &trans  &trans  &trans  &trans  &trans
+   &trans  &trans  &trans  &trans  &trans  &trans               &trans  &kp MINUS  &kp PLUS  &kp EQUAL  &trans  &trans
    &trans  &trans  &trans  &trans  &trans  &trans             &trans  &trans  &trans  &trans  &trans  &trans
                         >;
                 };
