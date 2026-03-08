@@ -70,6 +70,24 @@ function toZMKKeycode(key) {
     return `&kp ${specialMap[key]}`;
   }
 
+  // Media controls
+  const mediaMap = {
+    "VOL+": "C_VOL_UP",
+    "VOL-": "C_VOL_DN",
+    MUTE: "C_MUTE",
+    "⏯": "C_PP",
+    PLAY: "C_PP",
+    "⏭": "C_NEXT",
+    NEXT: "C_NEXT",
+    "⏮": "C_PREV",
+    PREV: "C_PREV",
+    "🔆": "C_BRI_UP",
+    "🔅": "C_BRI_DN",
+  };
+  if (mediaMap[key]) {
+    return `&kp ${mediaMap[key]}`;
+  }
+
   // Numbers
   if (key.match(/^[0-9]$/)) {
     return `&kp N${key}`;
