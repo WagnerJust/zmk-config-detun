@@ -1,2 +1,4 @@
 *.diff
 keyboard-visualizer/key-colors.json
+
+.DS_Store
